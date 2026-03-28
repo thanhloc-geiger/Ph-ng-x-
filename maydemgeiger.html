@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Quan trắc Phóng xạ - IoT Physics</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f9; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: auto; }
+        h1 { color: #2c3e50; margin-bottom: 30px; }
+        
+        /* Thẻ chỉ số chính */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; border-top: 5px solid #3498db; }
+        .card h3 { margin: 0; color: #7f8c8d; font-size: 0.9em; text-transform: uppercase; }
+        .card .value { font-size: 2.5em; font-weight: bold; margin: 10px 0; color: #2c3e50; }
+        .card .unit { color: #95a5a6; }
+
+        /* Trạng thái an toàn */
+        #status-card { border-top-color: #2ecc71; }
+        .status-safety { color: #2ecc71; }
+        .status-warning { color: #f1c40f; }
+        .status-danger { color: #e74c3c; }
+
+        /* Biểu đồ */
+        .chart-container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 30px; height: 400px; }
+
+        /* Bảng số liệu */
+        .table-container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: center; border-bottom: 1px solid #eee; }
+        th { background-color: #3498db; color: white; }
+        tr:hover { background-color: #f1f1f1; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>☢️ BẢNG ĐIỀU KHIỂN QUAN TRẮC PHÓNG XẠ</h1>
+
+    <div class="stats-grid">
+        <div class="card">
+            <h3>Tốc độ đếm</h3>
+            <div class="value" id="cpm">0</div>
+            <div class="unit">CPM</div>
+        </div>
+        <div class="card">
+            <h3>Suất liều</h3>
+            <div class="value" id="usvh">0.00</div>
+            <div class="unit">$\mu Sv/h$</div>
+        </div>
+        <div id="status-card" class="card">
+            <h3>Cảnh báo</h3>
+            <div class="value" id="status" style="font-size: 1.8em; padding-top: 15px;">Đang đợi...</div>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="radiationChart"></canvas>
+    </div>
+
+    <div class="table-container">
+        <h3>Lịch sử đo đạc (Mỗi 15 giây)</h3>
+        <table id="historyTable">
+            <thead>
+                <tr>
+                    <th>Thời điểm</th>
+                    <th>Số hạt (15s)</th>
+                    <th>CPM</th>
+                    <th>Suất liều ($\mu Sv/h$)</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // --- CẤU HÌNH FIREBASE CỦA BẠN ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyB67-4w3DKnrbVPgnGhcJYCxA3pkm1CIOA",
+        databaseURL: "https://geiger-55c26-default-rtdb.asia-southeast1.firebasedatabase.app"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // --- CẤU HÌNH BIỂU ĐỒ (Chart.js) ---
+    const ctx = document.getElementById('radiationChart').getContext('2d');
+    const radChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [], 
+            datasets: [{
+                label: 'Suất liều Phóng xạ ($\mu Sv/h$)',
+                data: [],
+                borderColor: '#e74c3c',
+                backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, title: { display: true, text: '$\mu Sv/h$' } }
+            }
+        }
+    });
+
+    // --- LẮNG NGHE DỮ LIỆU TỪ FIREBASE ---
+    database.ref('Radiation').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return;
+
+        const time = new Date().toLocaleTimeString();
+
+        // 1. Cập nhật các thẻ chỉ số
+        document.getElementById('cpm').innerText = data.CPM;
+        document.getElementById('usvh').innerText = data.uSvh.toFixed(3);
+        document.getElementById('status').innerText = data.Status;
+
+        // Đổi màu cảnh báo
+        const statusCard = document.getElementById('status-card');
+        if (data.Status === "Safety") statusCard.style.borderTopColor = "#2ecc71";
+        else if (data.Status === "Unsafe") statusCard.style.borderTopColor = "#f1c40f";
+        else statusCard.style.borderTopColor = "#e74c3c";
+
+        // 2. Cập nhật Biểu đồ (Giữ lại 20 điểm đo gần nhất)
+        if (radChart.data.labels.length > 20) {
+            radChart.data.labels.shift();
+            radChart.data.datasets[0].data.shift();
+        }
+        radChart.data.labels.push(time);
+        radChart.data.datasets[0].data.push(data.uSvh);
+        radChart.update();
+
+        // 3. Cập nhật Bảng thống kê (Thêm dòng mới lên đầu)
+        const tableBody = document.querySelector("#historyTable tbody");
+        const newRow = tableBody.insertRow(0);
+        newRow.innerHTML = `
+            <td>${time}</td>
+            <td>${data.LastCount}</td>
+            <td>${data.CPM}</td>
+            <td>${data.uSvh.toFixed(3)}</td>
+        `;
+    });
+</script>
+
+</body>
+</html>
