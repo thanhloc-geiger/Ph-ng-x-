@@ -1,189 +1,270 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phóng xạ</title>
-    
+    <title>Hệ thống Thí nghiệm Phóng xạ IoT - ĐHSP Hà Nội</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f4f8; color: #333; margin: 0; padding: 20px; text-align: center; }
-        .container { max-width: 1100px; margin: auto; }
-        h1 { color: #2c3e50; font-size: 2.5em; margin-bottom: 30px; }
-        
-        /* Dashboard Stats */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-bottom: 6px solid #3498db; }
-        .card .value { font-size: 3em; font-weight: bold; color: #2c3e50; display: block; margin: 10px 0; }
-        .card .unit { color: #95a5a6; font-size: 1.1em; }
-
-        /* Chart */
-        .chart-box { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 30px; height: 400px; }
-
-        /* Table & Export Button */
-        .table-box { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow-x: auto; }
-        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-        
-        .btn-excel { 
-            background-color: #27ae60; color: white; border: none; padding: 12px 25px; 
-            border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1em;
-            transition: background 0.3s; display: flex; align-items: center; gap: 8px;
+        :root {
+            --safety: #2ecc71; --unsafe: #f1c40f; --danger: #e74c3c;
+            --dark: #2c3e50; --light: #ecf0f1;
         }
-        .btn-excel:hover { background-color: #219150; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding: 20px; color: var(--dark); }
+        .container { max-width: 1200px; margin: auto; }
+        
+        /* Dashboard Monitor */
+        .dashboard { background: var(--dark); color: white; padding: 25px; border-radius: 15px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 30px; border-bottom: 5px solid #3498db; }
+        .stat-box { text-align: center; }
+        .stat-label { font-size: 0.9em; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-val { font-size: 2.8em; font-weight: bold; display: block; margin: 5px 0; }
+        #status-indicator { padding: 12px 25px; border-radius: 50px; font-weight: bold; font-size: 1.2em; border: 2px solid white; transition: 0.5s; }
 
+        /* Navigation Tabs */
+        .tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; }
+        .tab-btn { padding: 15px 25px; border: none; background: #dcdde1; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.3s; color: var(--dark); }
+        .tab-btn.active { background: #3498db; color: white; box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3); }
+
+        /* Content Panels */
+        .panel { background: white; padding: 30px; border-radius: 15px; display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.05); animation: fadeIn 0.5s; }
+        .panel.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Servo Controls */
+        .control-group { margin: 20px 0; padding: 15px; border: 1px dashed #3498db; border-radius: 10px; }
+        .grid-angles { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 10px; margin-top: 15px; }
+        .btn-servo { padding: 10px; border: 1px solid #3498db; background: white; color: #3498db; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-servo:hover { background: #3498db; color: white; }
+        .btn-servo.active-pos { background: #e67e22; color: white; border-color: #e67e22; }
+
+        /* Data Display */
+        .data-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .table-wrapper { max-height: 400px; overflow-y: auto; background: #fff; border: 1px solid #eee; }
         table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 15px; text-align: center; border-bottom: 1px solid #eee; }
-        th { background-color: #3498db; color: white; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        .badge { padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 0.9em; }
-        .badge-safe { background: #d4edda; color: #155724; }
-        .badge-warn { background: #f8d7da; color: #721c24; }
+        th, td { padding: 12px; border: 1px solid #eee; text-align: center; }
+        th { background: #3498db; color: white; position: sticky; top: 0; }
+        .chart-container { height: 400px; position: relative; }
+
+        .history-badge { font-size: 0.8em; padding: 4px 8px; border-radius: 4px; color: white; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>☢️ PHÓNG XẠ</h1>
+    <header style="text-align:center; margin-bottom: 20px;">
+        <h1 style="margin:0; color: var(--dark);">HỆ THỐNG QUẢN LÝ PHÓNG XẠ IOT</h1>
+        <p style="color: #7f8c8d;">Khóa luận tốt nghiệp - ĐHSP Hà Nội | Sinh viên thực hiện: Nguyễn Văn Lộc</p>
+    </header>
 
-    <div class="stats-grid">
-        <div class="card">
-            <h3>Tốc độ đếm</h3>
-            <span class="value" id="cpm">0</span>
-            <span class="unit">CPM</span>
+    <div class="dashboard">
+        <div class="stat-box">
+            <span class="stat-label">Suất liều ($\mu Sv/h$)</span>
+            <span class="stat-val" id="val-usvh">0.000</span>
         </div>
-        <div class="card">
-            <h3>Suất liều</h3>
-            <span class="value" id="usvh">0.000</span>
-            <span class="unit">$\mu Sv/h$</span>
+        <div class="stat-box">
+            <span class="stat-label">Số hạt (CPM)</span>
+            <span class="stat-val" id="val-cpm">0</span>
         </div>
-        <div id="status-card" class="card">
-            <h3>Trạng thái</h3>
-            <span class="value" id="status" style="font-size: 1.8em;">--</span>
-            <span id="last-update" style="color: #95a5a6; font-size: 0.9em;">Đang đợi dữ liệu...</span>
+        <div class="stat-box">
+            <div id="status-indicator">ĐANG KẾT NỐI...</div>
+            <p id="val-datetime" style="margin-top:10px; font-family: monospace;">--/--/-- --:--:--</p>
         </div>
     </div>
 
-    <div class="chart-box">
-        <canvas id="radChart"></canvas>
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab(event, 'tn1')">TN1: Ngẫu nhiên</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tn2')">TN2: Góc chiếu</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tn4')">TN4: Đâm xuyên</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tn5')">TN5: Đổi mẫu</button>
+        <button class="tab-btn" onclick="switchTab(event, 'history')">Toàn bộ Lịch sử</button>
     </div>
 
-    <div class="table-box">
-        <div class="table-header">
-            <h3>NHẬT KÝ ĐO CHI TIẾT</h3>
-            <button class="btn-excel" onclick="exportToExcel()">
-                📊 Xuất Báo Cáo Excel
-            </button>
+    <div id="tn1" class="panel active">
+        <h3>Thí nghiệm 1: Tính ngẫu nhiên (Vị trí 0°)</h3>
+        <div class="data-layout">
+            <div class="chart-container"><canvas id="chart-tn1"></canvas></div>
+            <div class="table-wrapper">
+                <table id="table-tn1"><thead><tr><th>Thời gian</th><th>CPM</th><th>$\mu Sv/h$</th><th>Trạng thái</th></tr></thead><tbody></tbody></table>
+            </div>
         </div>
-        <table id="logTable">
-            <thead>
-                <tr>
-                    <th>STT</th>
-                    <th>Thời điểm</th>
-                    <th>Số hạt (15s)</th>
-                    <th>CPM</th>
-                    <th>Suất liều ($\mu Sv/h$)</th>
-                    <th>Đánh giá</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+    </div>
+
+    <div id="tn2" class="panel">
+        <h3>Thí nghiệm 2: Sự phụ thuộc Góc chiếu ($-90^\circ$ đến $90^\circ$)</h3>
+        <div class="control-group">
+            <strong>Chọn góc xoay Servo (MG996R):</strong>
+            <div class="grid-angles" id="tn2-angles"></div>
+        </div>
+        <div class="data-layout">
+            <div class="chart-container"><canvas id="chart-tn2"></canvas></div>
+            <div class="table-wrapper">
+                <table id="table-tn2"><thead><tr><th>Góc xoay</th><th>CPM</th><th>$\mu Sv/h$</th><th>Trạng thái</th></tr></thead><tbody></tbody></table>
+            </div>
+        </div>
+    </div>
+
+    <div id="tn4" class="panel">
+        <h3>Thí nghiệm 4: Tính đâm xuyên vật liệu</h3>
+        <div class="control-group">
+            <strong>Thay đổi vật chắn (Servo MG90S):</strong>
+            <div class="grid-angles">
+                <button class="btn-servo" onclick="sendControl('TargetShield', 0, 'Không chắn')">0° (Khí)</button>
+                <button class="btn-servo" onclick="sendControl('TargetShield', 60, 'Giấy')">60° (Giấy)</button>
+                <button class="btn-servo" onclick="sendControl('TargetShield', 120, 'Nhôm')">120° (Nhôm)</button>
+                <button class="btn-servo" onclick="sendControl('TargetShield', 180, 'Chì')">180° (Chì)</button>
+            </div>
+        </div>
+        <div class="data-layout">
+            <div class="chart-container"><canvas id="chart-tn4"></canvas></div>
+            <div class="table-wrapper">
+                <table id="table-tn4"><thead><tr><th>Vật liệu</th><th>CPM</th><th>$\mu Sv/h$</th><th>Trạng thái</th></tr></thead><tbody></tbody></table>
+            </div>
+        </div>
+    </div>
+
+    <div id="tn5" class="panel">
+        <h3>Thí nghiệm 5: So sánh các mẫu phóng xạ</h3>
+        <div class="control-group">
+            <strong>Thay đổi mẫu vật (Servo MG996R):</strong>
+            <div class="grid-angles">
+                <button class="btn-servo" onclick="sendControl('TargetBase', 0, 'Nguồn chuẩn')">0° (Chuẩn)</button>
+                <button class="btn-servo" onclick="sendControl('TargetBase', 60, 'Granite')">60° (Granite)</button>
+                <button class="btn-servo" onclick="sendControl('TargetBase', 120, 'Đất tự nhiên')">120° (Đất)</button>
+                <button class="btn-servo" onclick="sendControl('TargetBase', 180, 'Phân KCl')">180° (Phân bón)</button>
+            </div>
+        </div>
+        <div class="data-layout">
+            <div class="chart-container"><canvas id="chart-tn5"></canvas></div>
+            <div class="table-wrapper">
+                <table id="table-tn5"><thead><tr><th>Mẫu vật</th><th>CPM</th><th>$\mu Sv/h$</th><th>Trạng thái</th></tr></thead><tbody></tbody></table>
+            </div>
+        </div>
+    </div>
+
+    <div id="history" class="panel">
+        <h3>Lịch sử đo đạc tổng hợp</h3>
+        <div class="table-wrapper" style="max-height: 600px;">
+            <table id="table-full-history">
+                <thead><tr><th>Ngày</th><th>Giờ</th><th>CPM</th><th>$\mu Sv/h$</th><th>Trạng thái</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <script>
-    // --- 1. CẤU HÌNH FIREBASE ---
-    const firebaseConfig = {
-        apiKey: "AIzaSyB67-4w3DKnrbVPgnGhcJYCxA3pkm1CIOA",
-        databaseURL: "https://geiger-55c26-default-rtdb.asia-southeast1.firebasedatabase.app"
-    };
+    // 1. CẤU HÌNH FIREBASE (Dựa trên thông tin của bạn)
+    const firebaseConfig = { databaseURL: "geiger-55c26-default-rtdb.asia-southeast1.firebasedatabase.app" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // --- 2. CẤU HÌNH BIỂU ĐỒ ---
-    const ctx = document.getElementById('radChart').getContext('2d');
-    const chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: [], 
-            datasets: [{
-                label: 'Suất liều ($\mu Sv/h$)',
-                data: [],
-                borderColor: '#3498db',
-                backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.3
-            }]
-        },
-        options: { responsive: true, maintainAspectRatio: false }
+    // 2. KHỞI TẠO BIỂU ĐỒ
+    function initChart(id, label) {
+        return new Chart(document.getElementById(id), {
+            type: 'line',
+            data: { labels: [], datasets: [{ label: label, data: [], borderColor: '#3498db', backgroundColor: 'rgba(52, 152, 219, 0.1)', fill: true, tension: 0.3 }] },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+        });
+    }
+    const charts = {
+        tn1: initChart('chart-tn1', 'Suất liều ($\mu Sv/h$)'),
+        tn2: initChart('chart-tn2', 'Suất liều theo Góc'),
+        tn4: initChart('chart-tn4', 'Suất liều theo Vật liệu'),
+        tn5: initChart('chart-tn5', 'Suất liều theo Mẫu')
+    };
+
+    let activeTab = 'tn1';
+    let currentLabel = '0°';
+
+    // 3. ĐIỀU KHIỂN SERVO
+    function sendControl(path, val, label) {
+        db.ref('Control/' + path).set(val);
+        currentLabel = label;
+        // Highlight nút đang chọn
+        document.querySelectorAll('.btn-servo').forEach(b => b.classList.remove('active-pos'));
+        event.target.classList.add('active-pos');
+    }
+
+    // Tạo các nút góc cho TN2 (0, 15, ..., 180)
+    for(let a=0; a<=180; a+=15) {
+        let btn = document.createElement('button');
+        btn.className = 'btn-servo';
+        btn.innerText = (a-90) + '°';
+        btn.onclick = (e) => sendControl('TargetBase', a, (a-90) + '°');
+        document.getElementById('tn2-angles').appendChild(btn);
+    }
+
+    // 4. LẮNG NGHE DỮ LIỆU REAL-TIME
+    db.ref('Current').on('value', snap => {
+        const d = snap.val();
+        if(!d) return;
+
+        // Cập nhật Monitor
+        document.getElementById('val-usvh').innerText = d.uSvh.toFixed(3);
+        document.getElementById('val-cpm').innerText = d.CPM;
+        document.getElementById('val-datetime').innerText = `${d.Date} | ${d.Time}`;
+        
+        let indicator = document.getElementById('status-indicator');
+        indicator.innerText = d.Status.toUpperCase();
+        
+        if(d.Status === "Safety") indicator.style.background = 'var(--safety)';
+        else if(d.Status === "Unsafe") indicator.style.background = 'var(--unsafe)';
+        else indicator.style.background = 'var(--danger)';
+
+        // Đẩy dữ liệu vào tab hiện tại
+        if(activeTab !== 'history') updateTabUI(d);
     });
 
-    let count = 0;
+    function updateTabUI(d) {
+        let table = document.querySelector(`#table-${activeTab} tbody`);
+        let chart = charts[activeTab];
+        let label = (activeTab === 'tn1') ? d.Time : currentLabel;
 
-    // --- 3. NHẬN DỮ LIỆU TỪ FIREBASE ---
-    db.ref('Logs').limitToLast(100).on('child_added', (snapshot) => {
-        const data = snapshot.val();
-        const time = data.Time || "--:--:--";
-        count++;
-
-        // Cập nhật thẻ
-        document.getElementById('cpm').innerText = data.CPM;
-        document.getElementById('usvh').innerText = data.uSvh.toFixed(3);
-        document.getElementById('status').innerText = data.Status;
-        document.getElementById('last-update').innerText = "Cập nhật lúc: " + time;
-
-        const sCard = document.getElementById('status-card');
-        sCard.style.borderBottomColor = data.Status === "Safety" ? "#2ecc71" : "#e74c3c";
-        document.getElementById('status').style.color = data.Status === "Safety" ? "#2ecc71" : "#e74c3c";
+        // Cập nhật bảng (Thêm lên đầu)
+        let row = table.insertRow(0);
+        row.insertCell(0).innerText = label;
+        row.insertCell(1).innerText = d.CPM;
+        row.insertCell(2).innerText = d.uSvh.toFixed(3);
+        let sCell = row.insertCell(3);
+        sCell.innerHTML = `<span class="history-badge" style="background:${getStatusColor(d.Status)}">${d.Status}</span>`;
 
         // Cập nhật biểu đồ
-        if (chart.data.labels.length > 50) {
-            chart.data.labels.shift();
-            chart.data.datasets[0].data.shift();
-        }
-        chart.data.labels.push(time);
-        chart.data.datasets[0].data.push(data.uSvh);
+        chart.data.labels.push(label);
+        chart.data.datasets[0].data.push(d.uSvh);
+        if(chart.data.labels.length > 20) { chart.data.labels.shift(); chart.data.datasets[0].data.shift(); }
         chart.update();
+    }
 
-        // Cập nhật bảng
-        const table = document.getElementById('logTable').getElementsByTagName('tbody')[0];
-        const row = table.insertRow(0);
-        const badge = data.Status === "Safety" ? "badge-safe" : "badge-warn";
-        row.innerHTML = `
-            <td>${count}</td>
-            <td>${time}</td>
-            <td>${data.LastCount}</td>
-            <td>${data.CPM}</td>
-            <td>${data.uSvh.toFixed(3)}</td>
-            <td><span class="badge ${badge}">${data.Status}</span></td>
-        `;
+    // Lấy lịch sử 50 bản ghi gần nhất
+    db.ref('History').limitToLast(50).on('child_added', snap => {
+        const d = snap.val();
+        let table = document.querySelector('#table-full-history tbody');
+        let row = table.insertRow(0);
+        row.insertCell(0).innerText = d.Date;
+        row.insertCell(1).innerText = d.Time;
+        row.insertCell(2).innerText = d.CPM;
+        row.insertCell(3).innerText = d.uSvh.toFixed(3);
+        let sCell = row.insertCell(4);
+        sCell.innerHTML = `<span class="history-badge" style="background:${getStatusColor(d.Status)}">${d.Status}</span>`;
     });
 
-    // --- 4. HÀM XUẤT EXCEL (CSV) ---
-    function exportToExcel() {
-        let csv = "\uFEFF"; // Thêm BOM để hiển thị tiếng Việt trong Excel
-        csv += "STT,Thoi diem,So hat (15s),CPM,Suat lieu (uSv/h),Danh gia\n";
-        
-        const rows = document.querySelectorAll("#logTable tbody tr");
-        rows.forEach(row => {
-            const cols = row.querySelectorAll("td");
-            let rowData = [];
-            cols.forEach(col => rowData.push(col.innerText));
-            csv += rowData.join(",") + "\n";
-        });
+    function getStatusColor(s) {
+        if(s === "Safety") return '#2ecc71';
+        if(s === "Unsafe") return '#f1c40f';
+        return '#e74c3c';
+    }
 
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", "Bao_cao_Phong_xa_11A11.csv");
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    // 5. CHUYỂN TAB
+    function switchTab(evt, tabId) {
+        activeTab = tabId;
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        evt.currentTarget.classList.add('active');
     }
 </script>
 
