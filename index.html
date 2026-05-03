@@ -10,7 +10,9 @@
     
     <style>
         :root {
-            --safety: #2ecc71; --unsafe: #f1c40f; --danger: #e74c3c;
+            --safety: #2ecc71; 
+            --unsafe: #f1c40f; 
+            --danger: #e74c3c;
             --dark: #2c3e50; --light: #ecf0f1; --accent: #9b59b6; --primary: #3498db;
         }
         body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding: 20px; color: var(--dark); }
@@ -57,9 +59,35 @@
         td { padding: 8px; border-bottom: 1px solid #eee; text-align: center; }
         .val-num { font-family: monospace; font-weight: bold; color: #2980b9; }
         .history-badge { font-size: 0.7em; padding: 3px 8px; border-radius: 10px; color: white; font-weight: bold; }
+
+        /* ĐỒNG HỒ THỜI GIAN THỰC (MỚI THÊM) */
+        .digital-clock {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--dark);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.5em;
+            font-weight: bold;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            z-index: 9999;
+            border: 2px solid var(--primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .clock-label { font-size: 0.4em; text-transform: uppercase; letter-spacing: 2px; opacity: 0.7; margin-bottom: 2px; }
     </style>
 </head>
 <body>
+
+<div class="digital-clock">
+    <span class="clock-label"></span>
+    <span id="live-clock">00:00:00</span>
+</div>
 
 <div class="container">
     <header style="text-align:center; margin-bottom: 20px;">
@@ -70,7 +98,7 @@
     <div class="main-grid">
         <div class="video-container">
             <div class="live-label">● LIVE FEED</div>
-            <img src="http://192.168.71.136:81/stream" onerror="this.src='https://via.placeholder.com/640x480?text=Camera+Offline'">
+            <img src="http://192.168.156.136:81/stream" onerror="this.src='https://via.placeholder.com/640x480?text=Camera+Offline'">
         </div>
 
         <div class="dashboard-wrap">
@@ -97,8 +125,8 @@
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab(event, 'tn1')">TN1: Ngẫu nhiên</button>
         <button class="tab-btn" onclick="switchTab(event, 'tn2')">TN2: Góc chiếu</button>
-        <button class="tab-btn" onclick="switchTab(event, 'tn4')">TN4: Đâm xuyên</button>
-        <button class="tab-btn" onclick="switchTab(event, 'tn5')">TN5: Đổi mẫu</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tn4')">TN3: Đâm xuyên</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tn5')">TN4: Đổi mẫu</button>
         <button class="tab-btn" onclick="switchTab(event, 'history')">📜 Lịch sử</button>
     </div>
 
@@ -124,8 +152,8 @@
 
     <div id="tn1" class="panel active"><h3>TN1: Khảo sát tính ngẫu nhiên</h3><div class="exp-content"></div></div>
     <div id="tn2" class="panel"><h3>TN2: Sự phụ thuộc Góc chiếu (Servo Base)</h3><div class="exp-content"></div></div>
-    <div id="tn4" class="panel"><h3>TN4: Khảo sát tính đâm xuyên (Servo Shield)</h3><div class="exp-content"></div></div>
-    <div id="tn5" class="panel"><h3>TN5: So sánh các mẫu phóng xạ (Servo Base)</h3><div class="exp-content"></div></div>
+    <div id="tn4" class="panel"><h3>TN3: Khảo sát tính đâm xuyên (Servo Shield)</h3><div class="exp-content"></div></div>
+    <div id="tn5" class="panel"><h3>TN4: So sánh các mẫu phóng xạ (Servo Base)</h3><div class="exp-content"></div></div>
     
     <div id="history" class="panel">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -151,6 +179,17 @@
     let currentLabel = '0°';
     let expStates = {};
     const SAMPLES_PER_2MIN = 8;
+
+    // --- ĐỒNG HỒ THỜI GIAN THỰC (MỚI THÊM) ---
+    function updateLiveClock() {
+        const now = new Date();
+        const timeStr = now.getHours().toString().padStart(2, '0') + ":" + 
+                        now.getMinutes().toString().padStart(2, '0') + ":" + 
+                        now.getSeconds().toString().padStart(2, '0');
+        document.getElementById('live-clock').innerText = timeStr;
+    }
+    setInterval(updateLiveClock, 1000);
+    updateLiveClock();
 
     // --- KHỞI TẠO PANEL ---
     ['tn1', 'tn2', 'tn4', 'tn5'].forEach(id => {
@@ -233,7 +272,15 @@
         if(state.count >= SAMPLES_PER_2MIN) {
             let avgC = (state.sumCPM / 8).toFixed(1);
             let avgU = (state.sumUSvh / 8).toFixed(4);
-            let avgStatus = (avgU < 0.52) ? "Safety" : "Danger";
+            
+            let avgStatus;
+            if (avgU < 52.0) {
+                avgStatus = "Safety";
+            } else if (avgU <= 100.0) {
+                avgStatus = "Unsafe";
+            } else {
+                avgStatus = "Danger";
+            }
 
             state.avgData.push({ label: label, cpm: avgC, usvh: avgU });
             state.chartAvg.data.labels.push(label);
@@ -246,16 +293,19 @@
         }
     }
 
-    function getCol(s) { return s==="Safety" ? 'var(--safety)' : 'var(--danger)'; }
+    function getCol(s) { 
+        if (s === "Safety") return 'var(--safety)';
+        if (s === "Unsafe") return 'var(--unsafe)';
+        return 'var(--danger)'; 
+    }
     
     function updateIndicator(s) {
         const ind = document.getElementById('status-indicator');
         ind.innerText = s.toUpperCase();
         ind.style.background = getCol(s);
-        ind.style.color = "white";
+        ind.style.color = (s === "Unsafe") ? "black" : "white"; 
     }
 
-    // Hiển thị 50 bản ghi mới nhất trong bảng Lịch sử (để web không bị lag)
     db.ref('History').limitToLast(50).on('child_added', snap => {
         const d = snap.val();
         let row = document.querySelector('#table-full-history tbody').insertRow(0);
@@ -275,7 +325,6 @@
         document.querySelector(`#${activeTab} .progress-text`).innerText = '0/8';
     }
 
-    // --- HÀM XUẤT EXCEL CHO TỪNG THÍ NGHIỆM ---
     function exportExcel() {
         let data = expStates[activeTab].avgData;
         if(data.length === 0) return alert("Chưa có dữ liệu trung bình!");
@@ -285,7 +334,6 @@
         a.download = `KetQua_${activeTab}.csv`; a.click();
     }
 
-    // --- HÀM MỚI: XUẤT TOÀN BỘ LỊCH SỬ ĐO ---
     function exportFullHistory() {
         alert("Đang tải dữ liệu từ server, vui lòng đợi trong giây lát...");
         db.ref('History').once('value').then(snap => {
@@ -293,12 +341,10 @@
             if (!historyData) return alert("Không có dữ liệu lịch sử!");
 
             let csv = "Ngay,Gio,CPM,uSvh,Trang Thai\n";
-            // Chuyển đối tượng Firebase thành mảng và sắp xếp hoặc lặp qua
             Object.values(historyData).forEach(item => {
                 csv += `${item.Date},${item.Time},${item.CPM},${item.uSvh.toFixed(4)},${item.Status}\n`;
             });
 
-            // Sử dụng "\ufeff" (BOM) để Excel nhận diện đúng tiếng Việt/Ký tự đặc biệt
             let blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
             let a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
