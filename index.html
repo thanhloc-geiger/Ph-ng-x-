@@ -204,7 +204,9 @@
         expStates[id].chartAvg = new Chart(ctxAvg, { type: 'line', data: { labels: [], datasets: [{ label: 'AVG µSv/h', data: [], borderColor: '#9b59b6', fill: true }] }, options: { maintainAspectRatio: false }});
 
         const ctrl = panel.querySelector('#controls-container');
-        if(id === 'tn2') {
+        if(id === 'tn1') {
+            createBtn(ctrl, 'Góc 90°', 'TargetBase', 90);
+        } else if(id === 'tn2') {
             for(let a=50; a<=130; a+=10) createBtn(ctrl, a+'°', 'TargetBase', a);
         } else if(id === 'tn4') {
             [['Khí',0],['Giấy',70],['Nhôm',118],['Chì',165]].forEach(v => createBtn(ctrl, v[0], 'TargetShield', v[1]));
