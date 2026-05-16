@@ -23,6 +23,8 @@
         .video-container { background: #000; border-radius: 15px; overflow: hidden; border: 4px solid var(--dark); position: relative; height: 450px; }
         .video-container img { width: 100%; height: 100%; object-fit: contain; }
         .live-label { position: absolute; top: 15px; left: 15px; background: red; color: white; padding: 5px 12px; border-radius: 4px; font-weight: bold; animation: blink 1.5s infinite; }
+        .btn-cam-reset { position: absolute; top: 15px; right: 15px; background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.5); color: white; padding: 5px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.3s; z-index: 10; }
+        .btn-cam-reset:hover { background: rgba(255, 255, 255, 0.4); }
         
         @keyframes blink { 50% { opacity: 0.5; } }
 
@@ -98,7 +100,8 @@
     <div class="main-grid">
         <div class="video-container">
             <div class="live-label">● LIVE FEED</div>
-            <img src="http://192.168.188.150" onerror="this.src='https://via.placeholder.com/640x480?text=Camera+Offline'">
+            <button class="btn-cam-reset" onclick="resetCamera()">🔄 KHỞI ĐỘNG LẠI CAMERA</button>
+            <img id="live-cam-img" src="http://192.168.188.150" onerror="this.src='https://via.placeholder.com/640x480?text=Camera+Offline'">
         </div>
 
         <div class="dashboard-wrap">
@@ -227,7 +230,7 @@
         parent.appendChild(b);
     }
 
-    // --- ĐIỀU KHIỂN STEPPER & RESET ---
+    // --- ĐIỀU KHIỂN STEPPER, RESET CAMERA & RESET HỆ THỐNG ---
     function sendStep() {
         const val = parseInt(document.getElementById('stepper-input').value);
         db.ref('Control/StepperPos').set(val);
@@ -237,11 +240,29 @@
         input.value = parseInt(input.value) + offset;
         sendStep();
     }
+    
+    function resetCamera() {
+        if(confirm("Xác nhận gửi lệnh khởi động lại khối Camera? Luồng video sẽ gián đoạn vài giây.")) {
+            // Gửi một trigger cờ báo hiệu yêu cầu reset lên Firebase. 
+            // ESP32 điều khiển chính cần lắng nghe cờ này để đóng ngắt relay cấp nguồn cho ESP32-CAM.
+            db.ref('Control/ResetCam').set(Date.now());
+            
+            // Tải lại thẻ img để trình duyệt thực hiện request luồng video mới
+            setTimeout(() => {
+                const imgTag = document.getElementById('live-cam-img');
+                const src = imgTag.src.split('?')[0]; 
+                imgTag.src = src + '?t=' + new Date().getTime();
+            }, 5000); 
+            
+            alert("Đã gửi lệnh Reset Camera! Vui lòng chờ hệ thống kết nối lại.");
+        }
+    }
+
     function resetSystem() {
         if(confirm("Xác nhận đưa toàn bộ thiết bị về vị trí 0?")) {
             db.ref('Control').set({ TargetBase: 0, TargetShield: 0, StepperPos: 0 });
             document.getElementById('stepper-input').value = 0;
-            alert("Đã gửi lệnh Reset!");
+            alert("Đã gửi lệnh Reset Toàn bộ cơ cấu!");
         }
     }
 
