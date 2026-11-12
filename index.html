@@ -1,2254 +1,2401 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chiến Hạm Vectơ: Sức Mạnh Hợp Lực | Vật Lí 10</title>
-  <style>
-    /* ========================================================
-       CSS STYLING: CYBERPUNK EDUCATIONAL GLASSMORPHISM
-       Tối ưu cho hiển thị màn hình lớn, máy chiếu & di động
-       ======================================================== */
-    :root {
-      --primary: #00f2fe;
-      --secondary: #4facfe;
-      --accent: #ffbc00;
-      --success: #06d6a0;
-      --danger: #ef476f;
-      --bg-dark: #070b19;
-      --card-bg: rgba(18, 26, 52, 0.85);
-      --card-border: rgba(0, 242, 254, 0.3);
-      --text-main: #f0f4fd;
-      --text-muted: #8e9bb4;
-      --font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-    }
-
-    /* Cho phép nhập và bôi đen văn bản trong ô input */
-    input {
-      user-select: text;
-      -webkit-user-select: text;
-    }
-
-    body {
-      font-family: var(--font-family);
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      min-height: 100vh;
-      overflow-x: hidden;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
-
-    /* Dynamic Particle Background Canvas */
-    #spaceCanvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    /* Confetti Canvas for Victory */
-    #confettiCanvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 999;
-      pointer-events: none;
-    }
-
-    /* Main Container */
-    .app-wrapper {
-      position: relative;
-      z-index: 10;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      max-width: 1200px;
-      margin: 0 auto;
-      width: 100%;
-      padding: 12px 20px;
-    }
-
-    /* Watermark */
-    .watermark {
-      position: fixed;
-      bottom: 12px;
-      right: 18px;
-      font-size: 11px;
-      color: rgba(255, 255, 255, 0.2);
-      letter-spacing: 1px;
-      pointer-events: none;
-      z-index: 5;
-    }
-
-    /* Header Bar */
-    header.game-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      padding: 12px 20px;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-      margin-bottom: 16px;
-    }
-
-    .brand-group {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .brand-logo-badge {
-      background: linear-gradient(135deg, #00f2fe, #4facfe);
-      color: #070b19;
-      font-weight: 900;
-      font-size: 16px;
-      padding: 8px 14px;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0, 242, 254, 0.5);
-      letter-spacing: 0.5px;
-    }
-
-    .brand-meta h1 {
-      font-size: 18px;
-      color: #ffffff;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
-
-    .brand-meta p {
-      font-size: 12px;
-      color: var(--primary);
-    }
-
-    .header-controls {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .icon-btn {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid var(--card-border);
-      color: var(--text-main);
-      padding: 8px 14px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.25s ease;
-    }
-
-    .icon-btn:hover {
-      background: rgba(0, 242, 254, 0.2);
-      border-color: var(--primary);
-      transform: translateY(-2px);
-    }
-
-    .icon-btn.highlight-btn {
-      background: rgba(255, 188, 0, 0.14);
-      border-color: rgba(255, 188, 0, 0.5);
-      color: var(--accent);
-    }
-
-    .icon-btn.highlight-btn:hover {
-      background: rgba(255, 188, 0, 0.28);
-      border-color: var(--accent);
-    }
-
-    /* Active Cadet Banner in Gameplay */
-    .cadet-status-bar {
-      display: none;
-      justify-content: space-between;
-      align-items: center;
-      background: rgba(0, 242, 254, 0.08);
-      border: 1px solid rgba(0, 242, 254, 0.25);
-      border-radius: 12px;
-      padding: 8px 16px;
-      margin-bottom: 12px;
-      font-size: 14px;
-    }
-
-    .cadet-identity {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: #ffffff;
-      font-weight: 600;
-    }
-
-    .cadet-badge-tag {
-      background: rgba(0, 242, 254, 0.2);
-      color: var(--primary);
-      padding: 2px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    /* Top Stats Bar (HUD) */
-    .hud-bar {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-
-    .hud-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 10px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      backdrop-filter: blur(10px);
-    }
-
-    .hud-label {
-      font-size: 12px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-    }
-
-    .hud-value {
-      font-size: 20px;
-      font-weight: 800;
-      color: #ffffff;
-      font-family: monospace, monospace;
-    }
-
-    .hud-value.timer {
-      color: var(--accent);
-    }
-    .hud-value.timer.urgent {
-      color: var(--danger);
-      animation: pulseAlert 0.8s infinite alternate;
-    }
-
-    @keyframes pulseAlert {
-      from { transform: scale(1); filter: drop-shadow(0 0 2px red); }
-      to { transform: scale(1.1); filter: drop-shadow(0 0 10px red); }
-    }
-
-    /* Equilibrium Progress Gauge */
-    .gauge-container {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 8px 16px;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .gauge-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--primary);
-      white-space: nowrap;
-    }
-
-    .gauge-track {
-      flex-grow: 1;
-      height: 14px;
-      background: rgba(0, 0, 0, 0.4);
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      position: relative;
-    }
-
-    .gauge-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #00f2fe, #06d6a0);
-      box-shadow: 0 0 12px #00f2fe;
-      transition: width 0.5s ease-out;
-    }
-
-    /* Screen Panels */
-    .screen-panel {
-      display: none;
-      flex-direction: column;
-      flex-grow: 1;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 20px;
-      padding: 28px;
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(14px);
-    }
-
-    .screen-panel.active {
-      display: flex;
-    }
-
-    /* SPLASH SCREEN */
-    .splash-hero {
-      text-align: center;
-      margin: auto 0;
-      padding: 10px;
-    }
-
-    .mission-badge {
-      display: inline-block;
-      padding: 6px 18px;
-      background: rgba(0, 242, 254, 0.15);
-      border: 1px solid var(--primary);
-      color: var(--primary);
-      border-radius: 30px;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      margin-bottom: 14px;
-    }
-
-    .game-title {
-      font-size: 36px;
-      font-weight: 900;
-      line-height: 1.25;
-      margin-bottom: 10px;
-      background: linear-gradient(90deg, #ffffff, #00f2fe, #4facfe);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 25px rgba(0, 242, 254, 0.4);
-    }
-
-    .game-slogan {
-      font-size: 17px;
-      color: var(--text-muted);
-      margin-bottom: 20px;
-      font-style: italic;
-    }
-
-    .briefing-box {
-      background: rgba(8, 14, 30, 0.7);
-      border-left: 4px solid var(--primary);
-      border-radius: 12px;
-      padding: 14px 20px;
-      max-width: 760px;
-      margin: 0 auto 22px auto;
-      text-align: left;
-      font-size: 14.5px;
-      line-height: 1.55;
-    }
-
-    .briefing-box ul {
-      margin-left: 20px;
-      margin-top: 6px;
-    }
-
-    .briefing-box li {
-      margin-bottom: 4px;
-      color: #cfd8eb;
-    }
-
-    /* STUDENT IDENTIFICATION FORM */
-    .student-id-card {
-      background: rgba(10, 18, 38, 0.85);
-      border: 1.5px solid rgba(0, 242, 254, 0.45);
-      border-radius: 16px;
-      padding: 20px 24px;
-      max-width: 640px;
-      margin: 0 auto 24px auto;
-      text-align: left;
-      box-shadow: 0 6px 24px rgba(0, 242, 254, 0.12);
-    }
-
-    .student-id-header {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--primary);
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      letter-spacing: 0.4px;
-    }
-
-    .student-input-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 14px;
-    }
-
-    .input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .input-group label {
-      font-size: 12.5px;
-      font-weight: 600;
-      color: #cfd8eb;
-    }
-
-    .input-group label span.req {
-      color: var(--danger);
-    }
-
-    .cyber-input {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1.5px solid rgba(255, 255, 255, 0.18);
-      border-radius: 10px;
-      padding: 12px 14px;
-      color: #ffffff;
-      font-size: 15px;
-      font-family: inherit;
-      outline: none;
-      transition: all 0.25s ease;
-      width: 100%;
-    }
-
-    .cyber-input::placeholder {
-      color: rgba(142, 155, 180, 0.6);
-    }
-
-    .cyber-input:focus {
-      border-color: var(--primary);
-      background: rgba(0, 242, 254, 0.08);
-      box-shadow: 0 0 14px rgba(0, 242, 254, 0.25);
-    }
-
-    .cyber-input.input-error {
-      border-color: var(--danger);
-      box-shadow: 0 0 12px rgba(239, 71, 111, 0.35);
-    }
-
-    .form-error-msg {
-      display: none;
-      color: var(--danger);
-      font-size: 13px;
-      font-weight: 600;
-      margin-top: 10px;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn-action-start {
-      background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
-      color: #070b19;
-      font-size: 19px;
-      font-weight: 800;
-      padding: 15px 42px;
-      border: none;
-      border-radius: 40px;
-      cursor: pointer;
-      box-shadow: 0 0 25px rgba(0, 242, 254, 0.6);
-      transition: all 0.3s ease;
-      letter-spacing: 1px;
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .btn-action-start:hover {
-      transform: translateY(-3px) scale(1.03);
-      box-shadow: 0 0 35px rgba(0, 242, 254, 0.9);
-    }
-
-    /* GAME PLAY PANEL */
-    .question-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding-bottom: 12px;
-    }
-
-    .cognitive-level-tag {
-      background: rgba(255, 188, 0, 0.15);
-      color: var(--accent);
-      border: 1px solid var(--accent);
-      padding: 4px 14px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .question-counter {
-      font-size: 14px;
-      color: var(--text-muted);
-    }
-
-    .question-body {
-      font-size: 22px;
-      font-weight: 600;
-      line-height: 1.5;
-      margin-bottom: 28px;
-      color: #ffffff;
-    }
-
-    /* Options Grid */
-    .options-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    .option-btn {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1.5px solid rgba(255, 255, 255, 0.15);
-      border-radius: 14px;
-      padding: 16px 20px;
-      color: var(--text-main);
-      font-size: 18px;
-      font-weight: 600;
-      text-align: left;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-    }
-
-    .option-btn:hover:not(:disabled) {
-      background: rgba(0, 242, 254, 0.12);
-      border-color: var(--primary);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(0, 242, 254, 0.25);
-    }
-
-    .option-letter {
-      width: 36px;
-      height: 36px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 16px;
-      color: var(--primary);
-      flex-shrink: 0;
-    }
-
-    .option-btn.correct {
-      background: rgba(6, 214, 160, 0.2) !important;
-      border-color: var(--success) !important;
-      color: #ffffff !important;
-      box-shadow: 0 0 20px rgba(6, 214, 160, 0.5);
-    }
-
-    .option-btn.correct .option-letter {
-      background: var(--success);
-      color: #070b19;
-    }
-
-    .option-btn.wrong {
-      background: rgba(239, 71, 111, 0.2) !important;
-      border-color: var(--danger) !important;
-      box-shadow: 0 0 20px rgba(239, 71, 111, 0.4);
-    }
-
-    .option-btn.wrong .option-letter {
-      background: var(--danger);
-      color: #ffffff;
-    }
-
-    /* Explanation Banner */
-    .feedback-banner {
-      display: none;
-      background: rgba(10, 20, 42, 0.95);
-      border-radius: 14px;
-      padding: 18px 24px;
-      border-left: 5px solid var(--primary);
-      margin-top: auto;
-      animation: fadeInUp 0.3s ease-out;
-    }
-
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(12px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .feedback-title {
-      font-size: 16px;
-      font-weight: 800;
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .feedback-text {
-      font-size: 15px;
-      line-height: 1.6;
-      color: #d8e2fd;
-      margin-bottom: 14px;
-    }
-
-    .btn-next-action {
-      background: linear-gradient(90deg, #00f2fe, #4facfe);
-      color: #070b19;
-      font-weight: 800;
-      font-size: 16px;
-      padding: 10px 28px;
-      border: none;
-      border-radius: 25px;
-      cursor: pointer;
-      float: right;
-      transition: all 0.2s ease;
-    }
-
-    .btn-next-action:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 0 15px rgba(0, 242, 254, 0.7);
-    }
-
-    /* VICTORY & SUMMARY SCREEN */
-    .result-hero {
-      text-align: center;
-      margin: auto 0;
-      padding: 10px;
-    }
-
-    .victory-title {
-      font-size: 32px;
-      font-weight: 900;
-      color: #ffffff;
-      margin-bottom: 8px;
-    }
-
-    .victory-badge {
-      font-size: 60px;
-      margin-bottom: 12px;
-      filter: drop-shadow(0 0 20px var(--accent));
-      display: inline-block;
-      animation: floatBadge 3s ease-in-out infinite alternate;
-    }
-
-    @keyframes floatBadge {
-      from { transform: translateY(0); }
-      to { transform: translateY(-10px); }
-    }
-
-    .student-result-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(0, 242, 254, 0.14);
-      border: 1px solid var(--primary);
-      color: var(--primary);
-      padding: 6px 18px;
-      border-radius: 30px;
-      font-size: 15px;
-      font-weight: 700;
-      margin-bottom: 14px;
-    }
-
-    .score-summary-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
-      max-width: 720px;
-      margin: 16px auto 24px auto;
-    }
-
-    .summary-card {
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 14px 10px;
-      text-align: center;
-    }
-
-    .summary-card-num {
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--primary);
-    }
-
-    .summary-card-label {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-
-    .result-actions {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 24px;
-    }
-
-    .btn-action-replay {
-      background: linear-gradient(135deg, #00f2fe, #4facfe);
-      color: #070b19;
-      font-size: 15px;
-      font-weight: 800;
-      padding: 12px 26px;
-      border: none;
-      border-radius: 30px;
-      cursor: pointer;
-      box-shadow: 0 0 20px rgba(0, 242, 254, 0.45);
-      transition: all 0.25s ease;
-    }
-
-    .btn-action-replay:hover {
-      transform: scale(1.04);
-    }
-
-    .btn-action-review {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      color: #ffffff;
-      font-size: 15px;
-      font-weight: 700;
-      padding: 12px 24px;
-      border-radius: 30px;
-      cursor: pointer;
-      transition: all 0.25s ease;
-    }
-
-    .btn-action-review:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    /* LEADERBOARD STYLING (Cả trên màn hình kết quả và Modal) */
-    .leaderboard-section {
-      background: rgba(8, 14, 30, 0.78);
-      border: 1px solid rgba(255, 188, 0, 0.35);
-      border-radius: 16px;
-      padding: 18px 20px;
-      max-width: 860px;
-      margin: 0 auto;
-      text-align: left;
-    }
-
-    .leaderboard-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 14px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .leaderboard-title {
-      font-size: 17px;
-      font-weight: 800;
-      color: var(--accent);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .leaderboard-tools {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .mini-tool-btn {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #e2e8f0;
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .mini-tool-btn:hover {
-      background: rgba(0, 242, 254, 0.18);
-      border-color: var(--primary);
-      color: #ffffff;
-    }
-
-    .mini-tool-btn.danger-btn:hover {
-      background: rgba(239, 71, 111, 0.22);
-      border-color: var(--danger);
-      color: #ffffff;
-    }
-
-    .table-responsive {
-      width: 100%;
-      overflow-x: auto;
-      max-height: 290px;
-      overflow-y: auto;
-    }
-
-    table.rank-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
-
-    table.rank-table th {
-      text-align: left;
-      padding: 10px 12px;
-      color: var(--text-muted);
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-      position: sticky;
-      top: 0;
-      background: #0b132b;
-      z-index: 2;
-    }
-
-    table.rank-table td {
-      padding: 10px 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      color: #f0f4fd;
-    }
-
-    table.rank-table tr.current-player-row {
-      background: rgba(0, 242, 254, 0.14);
-    }
-
-    table.rank-table tr.current-player-row td {
-      border-top: 1px solid rgba(0, 242, 254, 0.4);
-      border-bottom: 1px solid rgba(0, 242, 254, 0.4);
-      font-weight: 700;
-    }
-
-    .rank-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 30px;
-      height: 26px;
-      border-radius: 8px;
-      font-weight: 800;
-      font-size: 13px;
-    }
-
-    .rank-1 { background: rgba(255, 215, 0, 0.2); color: #ffd700; border: 1px solid #ffd700; }
-    .rank-2 { background: rgba(192, 192, 192, 0.2); color: #e2e8f0; border: 1px solid #cbd5e1; }
-    .rank-3 { background: rgba(205, 127, 50, 0.2); color: #f59e0b; border: 1px solid #d97706; }
-    .rank-other { background: rgba(255, 255, 255, 0.06); color: var(--text-muted); }
-
-    .score-pill {
-      background: rgba(6, 214, 160, 0.18);
-      color: var(--success);
-      border: 1px solid rgba(6, 214, 160, 0.4);
-      padding: 3px 10px;
-      border-radius: 12px;
-      font-weight: 800;
-      font-size: 13px;
-      display: inline-block;
-    }
-
-    /* LEADERBOARD OVERLAY MODAL (Mở từ nút trên Header) */
-    .modal-backdrop {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(4, 7, 17, 0.82);
-      backdrop-filter: blur(8px);
-      z-index: 100;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-    }
-
-    .modal-backdrop.open {
-      display: flex;
-    }
-
-    .modal-card {
-      background: #0d152e;
-      border: 1px solid var(--primary);
-      border-radius: 20px;
-      width: 100%;
-      max-width: 840px;
-      padding: 24px;
-      box-shadow: 0 16px 50px rgba(0, 0, 0, 0.8);
-      animation: fadeInUp 0.25s ease-out;
-    }
-
-    .modal-top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-
-    .close-modal-btn {
-      background: rgba(255, 255, 255, 0.1);
-      border: none;
-      color: #ffffff;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      font-size: 18px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .close-modal-btn:hover {
-      background: var(--danger);
-    }
-
-    /* Toast Notification */
-    .toast-notice {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: #06d6a0;
-      color: #070b19;
-      font-weight: 800;
-      font-size: 14px;
-      padding: 10px 22px;
-      border-radius: 30px;
-      box-shadow: 0 8px 25px rgba(6, 214, 160, 0.5);
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.3s ease;
-      z-index: 1000;
-    }
-
-    .toast-notice.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    /* REVIEW DRAWER */
-    .review-container {
-      display: none;
-      margin-top: 20px;
-      text-align: left;
-      max-height: 360px;
-      overflow-y: auto;
-      padding-right: 8px;
-      max-width: 860px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .review-item {
-      background: rgba(0, 0, 0, 0.35);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      padding: 14px 18px;
-      margin-bottom: 12px;
-    }
-
-    .review-item.pass {
-      border-left: 4px solid var(--success);
-    }
-
-    .review-item.fail {
-      border-left: 4px solid var(--danger);
-    }
-
-    /* Footer */
-    footer.game-footer {
-      margin-top: auto;
-      padding: 14px 0 6px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-      font-size: 12px;
-      color: var(--text-muted);
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .footer-brand {
-      color: var(--primary);
-      font-weight: 600;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .hud-bar {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      .score-summary-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      .student-input-grid {
-        grid-template-columns: 1fr;
-      }
-      .options-grid {
-        grid-template-columns: 1fr;
-      }
-      .game-title {
-        font-size: 26px;
-      }
-      .question-body {
-        font-size: 18px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đường Lên Đỉnh Physic - Trò Chơi Học Tập Vật Lí</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PDF.js để đọc trực tiếp đề thi trắc nghiệm từ file PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- Google Fonts hỗ trợ tiếng Việt đẹp, tươi sáng -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 50%, #fef9c3 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        h1, h2, h3, .font-display {
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        /* Hiệu ứng rung khi trả lời sai */
+        @keyframes shakeError {
+            0%, 100% { transform: translateX(0); }
+            15% { transform: translateX(-10px); }
+            30% { transform: translateX(10px); }
+            45% { transform: translateX(-8px); }
+            60% { transform: translateX(8px); }
+            75% { transform: translateX(-4px); }
+            90% { transform: translateX(4px); }
+        }
+        .animate-shake {
+            animation: shakeError 0.55s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        /* Hiệu ứng nảy nhẹ khi trả lời đúng */
+        @keyframes popSuccess {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.04); }
+            70% { transform: scale(0.98); }
+            100% { transform: scale(1); }
+        }
+        .animate-pop {
+            animation: popSuccess 0.45s ease-out forwards;
+        }
+
+        /* Hiệu ứng lơ lửng cho các thiết bị vật lí trang trí */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(3deg); }
+        }
+        .animate-float {
+            animation: floatSlow 5s ease-in-out infinite;
+        }
+        .animate-float-delayed {
+            animation: floatSlow 6s ease-in-out 2s infinite;
+        }
+
+        /* Hiệu ứng con lắc đơn đung đưa */
+        @keyframes pendulumSwing {
+            0%, 100% { transform: rotate(-16deg); }
+            50% { transform: rotate(16deg); }
+        }
+        .pendulum-arm {
+            transform-origin: 50% 8px;
+            animation: pendulumSwing 2.6s ease-in-out infinite;
+        }
+
+        /* Sóng nhạc nền Equalizer */
+        @keyframes eqBar {
+            0%, 100% { height: 4px; }
+            50% { height: 16px; }
+        }
+        .eq-bar-1 { animation: eqBar 0.6s ease-in-out infinite; }
+        .eq-bar-2 { animation: eqBar 0.45s ease-in-out 0.15s infinite; }
+        .eq-bar-3 { animation: eqBar 0.55s ease-in-out 0.3s infinite; }
+
+        /* Chuyển động mượt cho nhân vật leo núi */
+        #climber-group {
+            transition: transform 0.85s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Tùy chỉnh thanh cuộn */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #93c5fd;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #60a5fa;
+        }
+    </style>
 </head>
-<body>
+<body class="text-slate-800 relative selection:bg-sky-200 selection:text-sky-900">
 
-  <!-- Dynamic Background Canvas -->
-  <canvas id="spaceCanvas"></canvas>
-  <canvas id="confettiCanvas"></canvas>
+    <!-- Họa tiết Vật Lí trang trí nền (SVG nhẹ nhàng, tươi sáng) -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden z-0 opacity-35">
+        <!-- Mô hình nguyên tử Bohr -->
+        <svg class="w-28 h-28 text-sky-500 absolute top-20 left-4 animate-float" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="50" cy="50" r="6" fill="currentColor"/>
+            <ellipse cx="50" cy="50" rx="40" ry="15" transform="rotate(30 50 50)"/>
+            <ellipse cx="50" cy="50" rx="40" ry="15" transform="rotate(-30 50 50)"/>
+            <ellipse cx="50" cy="50" rx="40" ry="15" transform="rotate(90 50 50)"/>
+        </svg>
+        <!-- Lăng kính tán sắc ánh sáng -->
+        <svg class="w-32 h-32 text-amber-500 absolute bottom-12 left-8 animate-float-delayed" viewBox="0 0 120 100" fill="none">
+            <polygon points="60,15 25,80 95,80" stroke="#0284c7" stroke-width="3" fill="rgba(186,230,253,0.4)"/>
+            <line x1="5" y1="55" x2="43" y2="48" stroke="#f59e0b" stroke-width="3"/>
+            <line x1="77" y1="48" x2="115" y2="38" stroke="#ef4444" stroke-width="2.5"/>
+            <line x1="79" y1="52" x2="115" y2="48" stroke="#22c55e" stroke-width="2.5"/>
+            <line x1="81" y1="56" x2="115" y2="58" stroke="#3b82f6" stroke-width="2.5"/>
+        </svg>
+        <!-- Nam châm chữ U -->
+        <svg class="w-24 h-24 text-rose-500 absolute top-24 right-6 animate-float-delayed" viewBox="0 0 100 100" fill="none">
+            <path d="M25,20 V55 A25,25 0 0,0 75,55 V20" stroke="#ef4444" stroke-width="12" stroke-linecap="butt"/>
+            <rect x="19" y="15" width="12" height="14" fill="#3b82f6"/>
+            <rect x="69" y="15" width="12" height="14" fill="#cbd5e1"/>
+        </svg>
+        <!-- Con lắc đơn -->
+        <svg class="w-24 h-28 text-emerald-600 absolute bottom-10 right-10" viewBox="0 0 100 110" fill="none">
+            <line x1="20" y1="8" x2="80" y2="8" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+            <g class="pendulum-arm">
+                <line x1="50" y1="8" x2="50" y2="75" stroke="currentColor" stroke-width="2.5"/>
+                <circle cx="50" cy="82" r="10" fill="#10b981"/>
+            </g>
+        </svg>
+    </div>
 
-  <!-- Toast thông báo nhanh -->
-  <div class="toast-notice" id="toastNotice">Đã sao chép bảng xếp hạng!</div>
+    <!-- Canvas Pháo Hoa Chúc Mừng -->
+    <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
 
-  <!-- Watermark thương hiệu -->
-  <div class="watermark" id="brandWatermark">VẬT LÍ 10 - KẾT NỐI TRI THỨC VỚI CUỘC SỐNG</div>
+    <!-- Thông báo Toast (Thay thế hoàn toàn alert) -->
+    <div id="toast-container" class="fixed top-20 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
 
-  <div class="app-wrapper">
+    <!-- THANH ĐIỀU HƯỚNG TRÊN CÙNG -->
+    <header class="relative z-20 bg-white/85 backdrop-blur-md border-b border-sky-200/80 shadow-sm sticky top-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+            <!-- Logo & Tên trò chơi -->
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-sky-500 to-emerald-500 flex items-center justify-center text-white shadow-md shadow-sky-200">
+                    <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m8 3 4 8 5-5 5 15H2L8 3z"/>
+                        <circle cx="17" cy="4" r="2" fill="#fde047" stroke="none"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-sky-700 via-blue-600 to-emerald-600 bg-clip-text text-transparent tracking-tight">
+                        ĐƯỜNG LÊN ĐỈNH PHYSIC
+                    </h1>
+                    <p id="active-topic-label" class="text-xs sm:text-sm font-medium text-slate-500 flex items-center gap-1.5">
+                        <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+                        <span>Chủ đề: Giao thoa sóng (Vật Lí 11)</span>
+                    </p>
+                </div>
+            </div>
 
-    <!-- HEADER BRANDING -->
-    <header class="game-header">
-      <div class="brand-group">
-        <div class="brand-logo-badge" id="brandLogo">⚡ VẬT LÍ 10</div>
-        <div class="brand-meta">
-          <h1 id="headerGameTitle">Chiến Hạm Vectơ: Sức Mạnh Hợp Lực</h1>
-          <p id="headerSlogan">Tổng hợp chuẩn xác - Kiến tạo cân bằng!</p>
+            <!-- Các nút điều khiển nhanh -->
+            <div class="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                <!-- Nút Thông tin Học sinh -->
+                <button id="student-profile-btn" onclick="openStudentJoinModal()" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-semibold text-xs sm:text-sm transition-all shadow-sm active:scale-95" title="Nhập hoặc đổi tên học sinh">
+                    <span>🧑‍🎓</span>
+                    <span id="header-student-name">Nhập tên HS</span>
+                </button>
+
+                <!-- Nút Xem Bảng Xếp Hạng Lớp Thời Gian Thực -->
+                <button onclick="openLeaderboardModal()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-300 font-semibold text-xs sm:text-sm transition-all shadow-sm active:scale-95" title="Xem bảng xếp hạng cả lớp theo thời gian thực">
+                    <span>🏆 Xếp hạng</span>
+                    <span id="header-rank-count" class="px-2 py-0.5 rounded-full bg-indigo-600 text-white text-xs font-bold">0</span>
+                </button>
+
+                <!-- Nút Bật/Tắt Nhạc nền Đỉnh Vinh Quang -->
+                <button id="bgm-toggle-btn" onclick="toggleBGM()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-semibold text-xs sm:text-sm transition-all shadow-sm active:scale-95" title="Bật/Tắt nhạc nền Đỉnh Vinh Quang">
+                    <div id="eq-bars" class="flex items-end gap-0.5 h-4 w-3.5">
+                        <span class="w-1 bg-amber-500 rounded-full eq-bar-1"></span>
+                        <span class="w-1 bg-amber-500 rounded-full eq-bar-2"></span>
+                        <span class="w-1 bg-amber-500 rounded-full eq-bar-3"></span>
+                    </div>
+                    <span id="bgm-status-text">Nhạc: Đỉnh Vinh Quang</span>
+                </button>
+
+                <!-- Nút Mở Bảng Giáo Viên (Tải file & Cài đặt số câu) -->
+                <button onclick="openTeacherModal()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 text-white font-semibold text-xs sm:text-sm shadow-md shadow-sky-200 transition-all active:scale-95">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    <span>Giáo viên / Tải đề</span>
+                </button>
+            </div>
         </div>
-      </div>
-      <div class="header-controls">
-        <button class="icon-btn highlight-btn" id="openLeaderboardBtn" title="Xem bảng xếp hạng học sinh">
-          🏆 Bảng xếp hạng (<span id="headerRankCount">0</span>)
-        </button>
-        <button class="icon-btn" id="audioToggleBtn" title="Bật / Tắt âm thanh">
-          <span id="audioIcon">🔊</span> Âm thanh
-        </button>
-        <button class="icon-btn" id="fullscreenBtn" title="Toàn màn hình trình chiếu">
-          ⛶ Toàn màn hình
-        </button>
-      </div>
     </header>
 
-    <!-- THANH HIỂN THỊ TÊN ĐỊNH DANH HỌC SINH KHI ĐANG CHƠI -->
-    <div class="cadet-status-bar" id="cadetStatusBar">
-      <div class="cadet-identity">
-        <span>👨‍🚀 Chỉ huy:</span>
-        <span id="activeCadetName" style="color: var(--primary);">---</span>
-        <span class="cadet-badge-tag" id="activeCadetClass">Lớp ---</span>
-      </div>
-      <div style="font-size: 12.5px; color: var(--text-muted);">
-        Đang ghi nhận thành tích vào Bảng xếp hạng
-      </div>
-    </div>
+    <!-- KHU VỰC CHÍNH CỦA TRÒ CHƠI -->
+    <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-7">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            
+            <!-- CỘT TRÁI: BẢN ĐỒ LEO NÚI ĐỈNH PHYSIC (5 cột trên màn hình lớn) -->
+            <section class="lg:col-span-5 bg-white/90 backdrop-blur-md rounded-3xl border border-sky-200/90 shadow-xl shadow-sky-100/60 p-4 sm:p-5 flex flex-col justify-between overflow-hidden">
+                <!-- Thanh trạng thái hành trình -->
+                <div class="flex items-center justify-between gap-2 mb-3">
+                    <div class="bg-sky-50 border border-sky-200 rounded-2xl px-3.5 py-2">
+                        <span class="text-xs text-sky-600 font-semibold block">CHẶNG HIỆN TẠI</span>
+                        <span id="step-progress-text" class="text-base sm:text-lg font-bold text-sky-900">Bậc 1 / 7</span>
+                    </div>
+                    <div class="bg-emerald-50 border border-emerald-200 rounded-2xl px-3.5 py-2 text-right">
+                        <span class="text-xs text-emerald-600 font-semibold block">ĐIỂM TÍCH LŨY</span>
+                        <span id="score-text" class="text-base sm:text-lg font-bold text-emerald-700">0 điểm</span>
+                    </div>
+                </div>
 
-    <!-- TOP HUD BAR (XP, Streak, Time, Question) -->
-    <div class="hud-bar" id="gameHud" style="display: none;">
-      <div class="hud-card">
-        <div>
-          <div class="hud-label">Điểm tích lũy (XP)</div>
-          <div class="hud-value" id="hudScore">0</div>
+                <!-- Khung vẽ SVG Ngọn Núi & Các Bậc Thang -->
+                <div class="relative w-full flex-1 min-h-[360px] sm:min-h-[430px] rounded-2xl bg-gradient-to-b from-sky-300 via-sky-100 to-emerald-100 border border-sky-200 overflow-hidden shadow-inner">
+                    <svg id="mountain-svg" viewBox="0 0 420 460" class="w-full h-full preserve-3d" preserveAspectRatio="xMidYMid slice">
+                        <defs>
+                            <linearGradient id="peakGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#334155"/>
+                                <stop offset="32%" stop-color="#475569"/>
+                                <stop offset="100%" stop-color="#059669"/>
+                            </linearGradient>
+                            <linearGradient id="snowGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#ffffff"/>
+                                <stop offset="100%" stop-color="#e0f2fe"/>
+                            </linearGradient>
+                            <linearGradient id="sunGlow" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#fef08a"/>
+                                <stop offset="100%" stop-color="#f59e0b"/>
+                            </linearGradient>
+                        </defs>
+
+                        <!-- Mặt trời rực rỡ trên đỉnh -->
+                        <circle cx="345" cy="65" r="34" fill="url(#sunGlow)" opacity="0.9"/>
+                        <circle cx="345" cy="65" r="46" fill="#fef08a" opacity="0.3"/>
+
+                        <!-- Đám mây bồng bềnh -->
+                        <g fill="#ffffff" opacity="0.85">
+                            <circle cx="70" cy="65" r="18"/>
+                            <circle cx="90" cy="60" r="22"/>
+                            <circle cx="112" cy="66" r="16"/>
+                            <rect x="70" y="65" width="42" height="18" rx="8"/>
+
+                            <circle cx="230" cy="45" r="14"/>
+                            <circle cx="246" cy="41" r="17"/>
+                            <circle cx="262" cy="46" r="13"/>
+                        </g>
+
+                        <!-- Dãy núi phụ phía sau -->
+                        <polygon points="-20,460 110,180 250,460" fill="#6ee7b7" opacity="0.65"/>
+                        <polygon points="210,460 350,190 460,460" fill="#34d399" opacity="0.6"/>
+
+                        <!-- Ngọn núi chính ĐỈNH PHYSIC -->
+                        <polygon points="15,460 210,68 405,460" fill="url(#peakGrad)"/>
+                        <!-- Chỏm tuyết & ánh hào quang trên đỉnh -->
+                        <polygon points="210,68 166,156 186,144 202,162 218,142 235,158 254,156" fill="url(#snowGrad)"/>
+
+                        <!-- Đỉnh Vinh Quang (Cờ & Cúp vàng tại đỉnh x=210, y=68) -->
+                        <g id="summit-flag" transform="translate(210, 68)">
+                            <line x1="0" y1="0" x2="0" y2="-36" stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round"/>
+                            <polygon points="0,-36 30,-27 0,-18" fill="#ef4444"/>
+                            <circle cx="0" cy="-38" r="3.5" fill="#fbbf24"/>
+                            <rect x="-46" y="-56" width="92" height="18" rx="9" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+                            <text x="0" y="-44" text-anchor="middle" font-size="9.5" font-weight="700" fill="#b45309">ĐỈNH PHYSIC</text>
+                        </g>
+
+                        <!-- Đường nối các bậc thang & Các điểm dừng sẽ được vẽ động bằng JS -->
+                        <path id="climb-path-line" d="" fill="none" stroke="#fde047" stroke-width="4" stroke-dasharray="7 6" stroke-linecap="round"/>
+                        <g id="steps-layer"></g>
+
+                        <!-- Nhân vật học sinh leo núi -->
+                        <g id="climber-group" transform="translate(80, 415)">
+                            <!-- Bóng dưới chân -->
+                            <ellipse cx="0" cy="14" rx="13" ry="4.5" fill="rgba(15,23,42,0.28)"/>
+                            <!-- Áo choàng siêu nhân Vật Lí -->
+                            <path d="M-6,-6 L-17,8 L-4,6 Z" fill="#ef4444"/>
+                            <!-- Thân -->
+                            <rect x="-8" y="-10" width="16" height="18" rx="6" fill="#0284c7"/>
+                            <!-- Biểu tượng nguyên tử nhỏ trên áo -->
+                            <circle cx="0" cy="-1" r="2.5" fill="#fde047"/>
+                            <!-- Đầu -->
+                            <circle cx="0" cy="-19" r="9.5" fill="#fed7aa"/>
+                            <!-- Mũ bảo hiểm / Tóc năng động -->
+                            <path d="M-9.5,-20 A9.5,9.5 0 0,1 9.5,-20 Z" fill="#1e293b"/>
+                            <!-- Mắt cười -->
+                            <circle cx="-3" cy="-18" r="1.3" fill="#0f172a"/>
+                            <circle cx="3" cy="-18" r="1.3" fill="#0f172a"/>
+                            <!-- Cánh tay giơ cao chiến thắng -->
+                            <path d="M-8,-6 L-15,-15" stroke="#0284c7" stroke-width="3.5" stroke-linecap="round"/>
+                            <path d="M8,-6 L15,-16" stroke="#0284c7" stroke-width="3.5" stroke-linecap="round"/>
+                        </g>
+                    </svg>
+                </div>
+
+                <!-- Chú thích nhỏ phía dưới núi -->
+                <div class="mt-3 flex items-center justify-between text-xs text-slate-500 px-1">
+                    <span>🚩 Xuất phát: Chân núi</span>
+                    <span>🏆 Đích: Chinh phục đỉnh cao</span>
+                </div>
+            </section>
+
+            <!-- CỘT PHẢI: KHUNG CÂU HỎI TRẮC NGHIỆM (7 cột trên màn hình lớn) -->
+            <section class="lg:col-span-7 bg-white/95 backdrop-blur-md rounded-3xl border border-sky-200/90 shadow-xl shadow-sky-100/60 p-5 sm:p-8 flex flex-col justify-between">
+                <div>
+                    <!-- Header câu hỏi -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-5 border-b border-slate-100">
+                        <div class="flex items-center gap-2.5">
+                            <span id="question-badge" class="px-3.5 py-1.5 rounded-xl bg-sky-100 text-sky-800 font-bold text-xs sm:text-sm tracking-wide">
+                                CÂU HỎI 1 / 7
+                            </span>
+                            <span id="question-category-tag" class="px-3 py-1 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold text-xs">
+                                Vật Lí
+                            </span>
+                        </div>
+                        <button onclick="restartCurrentQuiz()" class="text-xs sm:text-sm font-semibold text-slate-500 hover:text-sky-600 flex items-center gap-1.5 px-3 py-1.5 rounded-xl hover:bg-sky-50 transition-colors" title="Trộn lại câu hỏi mới từ kho đề hiện tại">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                                <path d="M21 3v5h-5"/>
+                                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                                <path d="M8 16H3v5"/>
+                            </svg>
+                            <span>Đổi bộ câu ngẫu nhiên</span>
+                        </button>
+                    </div>
+
+                    <!-- Nội dung câu hỏi -->
+                    <div class="bg-gradient-to-br from-sky-50/90 to-indigo-50/50 rounded-2xl p-5 sm:p-6 border border-sky-100 mb-6">
+                        <h2 id="question-text" class="text-lg sm:text-2xl font-bold text-slate-800 leading-relaxed">
+                            Đang tải câu hỏi Vật Lí...
+                        </h2>
+                    </div>
+
+                    <!-- Danh sách 4 đáp án A, B, C, D -->
+                    <div id="options-grid" class="grid grid-cols-1 gap-3.5">
+                        <!-- Các nút đáp án sẽ được render bằng JS -->
+                    </div>
+                </div>
+
+                <!-- Thanh phản hồi trạng thái trả lời -->
+                <div id="feedback-banner" class="mt-6 min-h-[56px] rounded-2xl px-4 py-3 flex items-center justify-between gap-3 bg-slate-50 border border-slate-200/80 transition-all">
+                    <div class="flex items-center gap-3">
+                        <span id="feedback-icon" class="text-2xl">💡</span>
+                        <p id="feedback-message" class="text-sm sm:text-base font-medium text-slate-600">
+                            Chọn một đáp án đúng để bước tiếp lên đỉnh núi Physic!
+                        </p>
+                    </div>
+                </div>
+            </section>
+
         </div>
-        <div style="font-size: 24px;">💎</div>
-      </div>
-
-      <div class="hud-card">
-        <div>
-          <div class="hud-label">Chuỗi chuẩn xác</div>
-          <div class="hud-value" id="hudStreak" style="color: #ffbc00;">0 🔥</div>
-        </div>
-        <div style="font-size: 24px;">🚀</div>
-      </div>
-
-      <div class="hud-card">
-        <div>
-          <div class="hud-label">Thời gian còn lại</div>
-          <div class="hud-value timer" id="hudTimer">10:00</div>
-        </div>
-        <div style="font-size: 24px;">⏱️</div>
-      </div>
-
-      <div class="hud-card">
-        <div>
-          <div class="hud-label">Khoang thử thách</div>
-          <div class="hud-value" id="hudProgress">1 / 10</div>
-        </div>
-        <div style="font-size: 24px;">🛡️</div>
-      </div>
-    </div>
-
-    <!-- EQUILIBRIUM GAUGE (Thanh đo độ cân bằng của trạm) -->
-    <div class="gauge-container" id="gaugeBox" style="display: none;">
-      <div class="gauge-title">MỨC CÂN BẰNG HỆ THỐNG: <span id="gaugePercent">0%</span></div>
-      <div class="gauge-track">
-        <div class="gauge-fill" id="gaugeFillBar"></div>
-      </div>
-    </div>
-
-    <!-- ==========================================
-         PANEL 1: SPLASH SCREEN (MÀN HÌNH BẮT ĐẦU)
-         ========================================== -->
-    <main class="screen-panel active" id="splashScreen">
-      <div class="splash-hero">
-        <div class="mission-badge">BÀI 13 • ĐỘNG LỰC HỌC VẬT LÍ 10</div>
-        <h2 class="game-title">CHIẾN HẠM VECTƠ<br>SỨC MẠNH HỢP LỰC</h2>
-        <div class="game-slogan">"Tổng hợp chuẩn xác – Kiến tạo cân bằng!"</div>
-
-        <div class="briefing-box">
-          <strong>🛰️ MẬT LỆNH CHỈ HUY:</strong>
-          Trạm chỉ huy không gian đang chịu tác động của nhiều trường lực bất đối xứng làm lệch quỹ đạo cân bằng. Người chỉ huy cần vận dụng kiến thức về <em>quy tắc hình bình hành, độ lớn hợp lực và điều kiện cân bằng</em> để giải mã 10 khoang năng lượng:
-          <ul>
-            <li>Mỗi câu trả lời chuẩn xác giúp tăng cường khiên chắn và tích lũy điểm xếp hạng.</li>
-            <li>Hệ thống tự động xếp hạng các học sinh theo <strong>số lượng câu trả lời đúng</strong> (ưu tiên XP và tốc độ nếu bằng câu đúng).</li>
-            <li>Hoàn thành nhiệm vụ trong vòng <strong>10 phút</strong> để ghi danh lên Bảng Vàng Chỉ Huy!</li>
-          </ul>
-        </div>
-
-        <!-- KHUNG NHẬP THÔNG TIN ĐỊNH DANH HỌC SINH -->
-        <div class="student-id-card">
-          <div class="student-id-header">
-            <span>🪪 HỒ SƠ ĐỊNH DANH CHỈ HUY (BẮT BUỘC TRƯỚC KHI XUẤT PHÁT)</span>
-          </div>
-          <div class="student-input-grid">
-            <div class="input-group">
-              <label for="studentNameInput">Họ và tên học sinh <span class="req">*</span></label>
-              <input type="text" id="studentNameInput" class="cyber-input" placeholder="Ví dụ: Nguyễn Minh Anh" maxlength="50" autocomplete="off">
-            </div>
-            <div class="input-group">
-              <label for="studentClassInput">Lớp / Mã định danh</label>
-              <input type="text" id="studentClassInput" class="cyber-input" placeholder="Ví dụ: 10A1" maxlength="20" autocomplete="off">
-            </div>
-          </div>
-          <div class="form-error-msg" id="studentFormError">
-            <span>⚠️ Vui lòng nhập Họ và tên học sinh để ghi danh lên bảng xếp hạng!</span>
-          </div>
-        </div>
-
-        <button class="btn-action-start" id="startMissionBtn">
-          <span>🚀 BẮT ĐẦU NHIỆM VỤ</span>
-        </button>
-      </div>
     </main>
 
-    <!-- ==========================================
-         PANEL 2: GAMEPLAY SCREEN (CÂU HỎI TRỰC QUAN)
-         ========================================== -->
-    <main class="screen-panel" id="quizScreen">
-      <div class="question-header">
-        <span class="cognitive-level-tag" id="questionLevelTag">⭐ Nhận biết</span>
-        <span class="question-counter" id="questionCounterTag">Thử thách 1 / 10</span>
-      </div>
-
-      <div class="question-body" id="questionText">
-        Nội dung câu hỏi đang được nạp...
-      </div>
-
-      <!-- 4 Phương án lựa chọn -->
-      <div class="options-grid" id="optionsGrid">
-        <button class="option-btn" data-index="0">
-          <div class="option-letter">A</div>
-          <div class="option-text">Phương án A</div>
-        </button>
-        <button class="option-btn" data-index="1">
-          <div class="option-letter">B</div>
-          <div class="option-text">Phương án B</div>
-        </button>
-        <button class="option-btn" data-index="2">
-          <div class="option-letter">C</div>
-          <div class="option-text">Phương án C</div>
-        </button>
-        <button class="option-btn" data-index="3">
-          <div class="option-letter">D</div>
-          <div class="option-text">Phương án D</div>
-        </button>
-      </div>
-
-      <!-- Bảng giải thích kiến thức sau khi chọn -->
-      <div class="feedback-banner" id="feedbackBanner">
-        <div class="feedback-title" id="feedbackTitle">
-          <span>✓ CHÍNH XÁC!</span>
-        </div>
-        <div class="feedback-text" id="feedbackText">
-          Lời giải thích kiến thức...
-        </div>
-        <button class="btn-next-action" id="nextQuestionBtn">TIẾP TỤC ➔</button>
-      </div>
-    </main>
-
-    <!-- ==========================================
-         PANEL 3: VICTORY & SUMMARY SCREEN
-         ========================================== -->
-    <main class="screen-panel" id="resultScreen">
-      <div class="result-hero">
-        <div class="victory-badge" id="resultMedalBadge">🏆</div>
-        <div class="student-result-pill" id="resultStudentIdentity">
-          👨‍🚀 Chỉ huy: Nguyễn Văn A • Lớp 10A1
-        </div>
-        <h2 class="victory-title" id="resultTitle">NHIỆM VỤ HOÀN THÀNH XUẤT SẮC!</h2>
-        <p class="game-slogan" id="resultSubtitle">Trạm chỉ huy đã thiết lập trạng thái cân bằng hoàn hảo!</p>
-
-        <div class="score-summary-grid">
-          <div class="summary-card">
-            <div class="summary-card-num" id="resCorrectCount" style="color: var(--success);">10 / 10</div>
-            <div class="summary-card-label">Số câu trả lời đúng</div>
-          </div>
-          <div class="summary-card">
-            <div class="summary-card-num" id="resTotalXp">1500 XP</div>
-            <div class="summary-card-label">Tổng điểm XP</div>
-          </div>
-          <div class="summary-card">
-            <div class="summary-card-num" id="resTimeUsed" style="color: var(--accent);">02:15</div>
-            <div class="summary-card-label">Thời gian hoàn thành</div>
-          </div>
-          <div class="summary-card">
-            <div class="summary-card-num" id="resRankPosition" style="color: #ffbc00;">#1</div>
-            <div class="summary-card-label">Thứ hạng hiện tại</div>
-          </div>
-        </div>
-
-        <div class="result-actions">
-          <button class="btn-action-replay" id="replayMissionBtn">🔄 CHƠI LẠI (CÙNG TÊN)</button>
-          <button class="btn-action-review" id="switchStudentBtn">👤 LƯỢT HỌC SINH MỚI</button>
-          <button class="btn-action-review" id="toggleReviewBtn">📝 XEM LỜI GIẢI CHI TIẾT</button>
-        </div>
-
-        <!-- BẢNG XẾP HẠNG TRỰC TIẾP TRÊN MÀN HÌNH KẾT QUẢ -->
-        <div class="leaderboard-section">
-          <div class="leaderboard-header">
-            <div class="leaderboard-title">
-              <span>🏆 BẢNG XẾP HẠNG CHỈ HUY (XẾP THEO SỐ CÂU ĐÚNG)</span>
+    <!-- MODAL BẢNG ĐIỀU KHIỂN GIÁO VIÊN (TẢI FILE & CÀI ĐẶT SỐ CÂU) -->
+    <div id="teacher-modal" class="fixed inset-0 z-40 hidden items-center justify-center bg-slate-900/55 backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-sky-100 overflow-hidden my-auto animate-pop">
+            <!-- Modal Header -->
+            <div class="bg-gradient-to-r from-sky-600 to-blue-600 px-6 py-4 flex items-center justify-between text-white">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-2xl">👩‍🏫</span>
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-bold">Thiết Lập Bài Học & Ngân Hàng Câu Hỏi</h3>
+                        <p class="text-xs text-sky-100">Dùng cho nhiều bài học, chủ đề khác nhau của môn Vật Lí</p>
+                    </div>
+                </div>
+                <button onclick="closeTeacherModal()" class="w-9 h-9 rounded-xl bg-white/15 hover:bg-white/25 flex items-center justify-center text-white font-bold transition-colors">
+                    ✕
+                </button>
             </div>
-            <div class="leaderboard-tools">
-              <button class="mini-tool-btn" id="copyResultCsvBtn" title="Sao chép bảng điểm để dán vào Excel">📋 Sao chép bảng điểm</button>
-              <button class="mini-tool-btn danger-btn" id="clearResultRankBtn" title="Xóa toàn bộ dữ liệu xếp hạng">🗑️ Xóa BXH</button>
+
+            <!-- Modal Body -->
+            <div class="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
+                <!-- 1. Tên bài học / Chủ đề -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5">
+                        1. Tên bài học / Chủ đề Vật Lí hôm nay:
+                    </label>
+                    <input type="text" id="topic-input" placeholder="Ví dụ: Chương 1 - Dao động cơ học" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none text-sm sm:text-base font-medium">
+                </div>
+
+                <!-- 2. Tải file câu hỏi lên -->
+                <div class="bg-sky-50/70 rounded-2xl p-4 border border-sky-200">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <label class="text-sm font-bold text-sky-900">
+                            2. Tải file câu hỏi trắc nghiệm (.pdf, .txt, .csv, .json):
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="downloadSampleTXT()" class="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-white hover:bg-sky-100 text-sky-700 border border-sky-300 transition-colors">
+                                ⬇️ Tải file mẫu (.txt)
+                            </button>
+                            <button type="button" onclick="downloadSampleCSV()" class="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-300 transition-colors">
+                                ⬇️ Tải file mẫu (.csv)
+                            </button>
+                        </div>
+                    </div>
+
+                    <label for="question-file-input" class="mt-2 flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-sky-400 rounded-2xl bg-white hover:bg-sky-50/80 cursor-pointer transition-all group">
+                        <div class="flex flex-col items-center justify-center pt-4 pb-4 px-4 text-center">
+                            <svg class="w-8 h-8 mb-2 text-sky-500 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                            </svg>
+                            <p class="text-sm font-semibold text-slate-700">Nhấn để chọn file câu hỏi từ máy tính</p>
+                            <p class="text-xs text-slate-500 mt-0.5">Hỗ trợ định dạng PDF, TXT (copy từ Word), CSV (Excel) hoặc JSON</p>
+                        </div>
+                        <input id="question-file-input" type="file" accept=".pdf,.txt,.csv,.json" class="hidden" onchange="handleFileUpload(event)">
+                    </label>
+
+                    <!-- Trạng thái kho câu hỏi hiện có -->
+                    <div class="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm">
+                        <span id="bank-status-badge" class="font-semibold text-emerald-700 bg-emerald-100/80 px-3 py-1 rounded-lg">
+                            📚 Kho đề hiện tại: 21 câu hỏi
+                        </span>
+                        <button type="button" onclick="resetToDefaultBank()" class="text-xs font-semibold text-slate-500 hover:text-sky-700 underline">
+                            Khôi phục bộ đề Giao thoa sóng (21 câu)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3. Chọn câu hỏi / số bậc leo núi từ ngân hàng dữ liệu -->
+                <div class="bg-amber-50/70 rounded-2xl p-4 border border-amber-200 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <label class="block text-sm font-bold text-amber-900">
+                            3. Chọn câu hỏi từ ngân hàng dữ liệu lên các bậc leo núi:
+                        </label>
+                        <!-- Chuyển đổi chế độ chọn ngẫu nhiên hoặc tự tích chọn từng câu -->
+                        <div class="inline-flex rounded-xl bg-amber-100/90 p-1 border border-amber-300">
+                            <button type="button" id="mode-random-btn" onclick="setSelectionMode('random')" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500 text-white shadow-sm transition-all">
+                                Chọn ngẫu nhiên
+                            </button>
+                            <button type="button" id="mode-manual-btn" onclick="setSelectionMode('manual')" class="px-2.5 py-1 rounded-lg text-xs font-bold text-amber-900 hover:bg-amber-200/70 transition-all">
+                                Tự chọn từng câu
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Chế độ 1: Chọn ngẫu nhiên theo số bậc -->
+                    <div id="random-mode-panel">
+                        <p class="text-xs text-amber-800/80 mb-2.5">
+                            Chọn số bậc leo núi (ví dụ 5, 7, 8, 9, 10 câu), hệ thống sẽ tự động lấy ngẫu nhiên từ kho đề hiện tại.
+                        </p>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <input type="number" id="step-count-input" min="1" max="50" value="7" class="w-24 px-3.5 py-2 rounded-xl border border-amber-300 bg-white font-bold text-lg text-center text-slate-800 focus:border-amber-500 outline-none">
+                            
+                            <!-- Các nút chọn nhanh 5, 7, 8, 9, 10 câu -->
+                            <div class="flex flex-wrap gap-1.5">
+                                <button type="button" onclick="setStepCountPreset(5)" class="px-3 py-1.5 rounded-xl bg-white hover:bg-amber-100 border border-amber-300 text-xs sm:text-sm font-bold text-amber-900 transition-colors">5 câu</button>
+                                <button type="button" onclick="setStepCountPreset(7)" class="px-3 py-1.5 rounded-xl bg-white hover:bg-amber-100 border border-amber-300 text-xs sm:text-sm font-bold text-amber-900 transition-colors">7 câu</button>
+                                <button type="button" onclick="setStepCountPreset(8)" class="px-3 py-1.5 rounded-xl bg-white hover:bg-amber-100 border border-amber-300 text-xs sm:text-sm font-bold text-amber-900 transition-colors">8 câu</button>
+                                <button type="button" onclick="setStepCountPreset(9)" class="px-3 py-1.5 rounded-xl bg-white hover:bg-amber-100 border border-amber-300 text-xs sm:text-sm font-bold text-amber-900 transition-colors">9 câu</button>
+                                <button type="button" onclick="setStepCountPreset(10)" class="px-3 py-1.5 rounded-xl bg-white hover:bg-amber-100 border border-amber-300 text-xs sm:text-sm font-bold text-amber-900 transition-colors">10 câu</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chế độ 2: Giáo viên tích chọn trực tiếp câu hỏi trong ngân hàng -->
+                    <div id="manual-mode-panel" class="hidden space-y-2.5">
+                        <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+                            <span id="manual-selected-counter" class="font-bold text-sky-800 bg-sky-100 px-2.5 py-1 rounded-lg">
+                                Đã chọn: 0 câu hỏi
+                            </span>
+                            <div class="flex items-center gap-1.5">
+                                <button type="button" onclick="selectAllBankQuestions()" class="px-2.5 py-1 rounded-lg bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-300 font-semibold transition-colors">
+                                    Chọn tất cả
+                                </button>
+                                <button type="button" onclick="clearAllBankQuestions()" class="px-2.5 py-1 rounded-lg bg-white hover:bg-rose-50 text-rose-700 border border-rose-300 font-semibold transition-colors">
+                                    Bỏ chọn hết
+                                </button>
+                            </div>
+                        </div>
+                        <div id="bank-question-checklist" class="max-h-56 overflow-y-auto bg-white rounded-xl border border-amber-200 divide-y divide-slate-100 p-1.5">
+                            <!-- Danh sách câu hỏi sẽ được render tự động bằng JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hướng dẫn nhanh định dạng file PDF / TXT -->
+                <details class="text-xs text-slate-600 bg-slate-50 rounded-xl p-3 border border-slate-200">
+                    <summary class="font-bold text-slate-700 cursor-pointer">Xem hướng dẫn định dạng file PDF / TXT đơn giản</summary>
+                    <pre class="mt-2 p-2.5 bg-white rounded-lg border border-slate-200 overflow-x-auto text-[11px] leading-relaxed text-slate-700">Câu 1: Đơn vị của công cơ học trong hệ SI là gì?
+A. Oát (W)
+B. Jun (J)
+C. Niutơn (N)
+D. Paxcan (Pa)
+Đáp án: B
+
+(File PDF có thể ghi "Đáp án: B" ngay dưới mỗi câu hoặc có bảng đáp án "1. B  2. C..." ở cuối đề)</pre>
+                </details>
             </div>
-          </div>
-          <div class="table-responsive">
-            <table class="rank-table">
-              <thead>
-                <tr>
-                  <th style="width: 70px;">Hạng</th>
-                  <th>Họ và tên học sinh</th>
-                  <th>Lớp / Mã</th>
-                  <th>Số câu đúng</th>
-                  <th>Điểm XP</th>
-                  <th>Thời gian</th>
-                </tr>
-              </thead>
-              <tbody id="resultLeaderboardBody">
-                <!-- Dữ liệu xếp hạng được đổ tự động tại đây -->
-              </tbody>
-            </table>
-          </div>
-        </div>
 
-        <div class="review-container" id="reviewContainer">
-          <!-- Danh sách câu hỏi và lời giải chi tiết sẽ được đổ vào đây -->
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                    <button id="clear-rank-trigger-btn" type="button" onclick="showClearRankConfirm()" class="px-3.5 py-2 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold text-xs sm:text-sm transition-colors">
+                        🗑️ Xóa bảng xếp hạng cũ
+                    </button>
+                    <div id="clear-rank-confirm-box" class="hidden items-center gap-1.5 bg-rose-100 px-2.5 py-1.5 rounded-xl border border-rose-300">
+                        <span class="text-xs font-bold text-rose-800">Xóa toàn bộ điểm lớp?</span>
+                        <button type="button" onclick="confirmClearLeaderboard()" class="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold">Xác nhận</button>
+                        <button type="button" onclick="hideClearRankConfirm()" class="px-2 py-1 rounded-lg bg-white text-slate-700 text-xs font-semibold">Hủy</button>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2.5">
+                    <button onclick="closeTeacherModal()" class="px-4 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-semibold text-sm transition-colors">
+                        Đóng
+                    </button>
+                    <button onclick="applyTeacherSettings()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-sm shadow-md shadow-emerald-200 transition-all active:scale-95">
+                        🚀 Phát đề cho cả lớp & Bắt đầu
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
-    </main>
-
-    <!-- FOOTER BRANDING -->
-    <footer class="game-footer">
-      <div>
-        Đơn vị: <span class="footer-brand" id="footerBrandName">TỔ VẬT LÍ TRƯỜNG THPT CHUYÊN</span> |
-        Hotline: <span id="footerPhone">0912.345.678</span>
-      </div>
-      <div>
-        Chương trình GDPT 2018 | Môn Vật lí 10
-      </div>
-    </footer>
-
-  </div>
-
-  <!-- ==========================================
-       MODAL BẢNG XẾP HẠNG TOÀN LỚP (MỞ TỪ HEADER)
-       ========================================== -->
-  <div class="modal-backdrop" id="leaderboardModal">
-    <div class="modal-card">
-      <div class="modal-top-bar">
-        <div class="leaderboard-title" style="font-size: 20px;">
-          <span>🏆 BẢNG XẾP HẠNG HỌC SINH THEO SỐ CÂU TRẢ LỜI ĐÚNG</span>
-        </div>
-        <button class="close-modal-btn" id="closeLeaderboardModalBtn" title="Đóng">✕</button>
-      </div>
-      <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-        <span>Tiêu chí xếp hạng: <strong>1. Số câu đúng</strong> ➔ <strong>2. Điểm XP</strong> ➔ <strong>3. Thời gian nhanh nhất</strong></span>
-        <div class="leaderboard-tools">
-          <button class="mini-tool-btn" id="copyModalCsvBtn">📋 Sao chép bảng điểm</button>
-          <button class="mini-tool-btn danger-btn" id="clearModalRankBtn">🗑️ Xóa dữ liệu BXH</button>
-        </div>
-      </div>
-      <div class="table-responsive" style="max-height: 400px;">
-        <table class="rank-table">
-          <thead>
-            <tr>
-              <th style="width: 70px;">Hạng</th>
-              <th>Họ và tên học sinh</th>
-              <th>Lớp / Mã</th>
-              <th>Số câu đúng</th>
-              <th>Điểm XP</th>
-              <th>Thời gian</th>
-            </tr>
-          </thead>
-          <tbody id="modalLeaderboardBody">
-            <!-- Dữ liệu xếp hạng modal -->
-          </tbody>
-        </table>
-      </div>
     </div>
-  </div>
 
-  <!-- ========================================================
-       JAVASCRIPT LOGIC ENGINE (ES6, WEB AUDIO, CANVAS, GAME STATE)
-       ======================================================== -->
-  <script>
-    /* ----------------------------------------------------
-       1. CẤU HÌNH THƯƠNG HIỆU & HỆ THỐNG
-       ---------------------------------------------------- */
-    const BRAND_CONFIG = {
-      name: "TỔ VẬT LÍ TRƯỜNG THPT CHUYÊN",
-      logoText: "⚡ VẬT LÍ 10",
-      phone: "0912.345.678",
-      website: "https://violet.vn/to-vat-li",
-      slogan: "Tổng hợp chuẩn xác - Kiến tạo cân bằng!",
-      title: "Chiến Hạm Vectơ: Sức Mạnh Hợp Lực"
-    };
+    <!-- MODAL CHIẾN THẮNG KHI LÊN TỚI ĐỈNH PHYSIC (KÈM BẢNG XẾP HẠNG LỚP THỜI GIAN THỰC) -->
+    <div id="victory-modal" class="fixed inset-0 z-40 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-7 text-center shadow-2xl border-2 border-amber-300 relative overflow-hidden my-auto animate-pop">
+            <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-amber-300 to-yellow-500 flex items-center justify-center text-3xl shadow-lg shadow-amber-200">
+                🏆
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-bold text-slate-800 mb-1">
+                CHINH PHỤC ĐỈNH PHYSIC!
+            </h2>
+            <p id="victory-student-greeting" class="text-sm text-slate-600 mb-4">
+                Chúc mừng bạn đã xuất sắc chạm tay tới Đỉnh Vinh Quang!
+            </p>
 
-    const TOTAL_TIME_SECONDS = 600; // 10 phút
-    const BASE_XP_PER_QUESTION = 100;
-    const STORAGE_KEY_LEADERBOARD = "chien_ham_vecto_leaderboard_v1";
+            <div class="grid grid-cols-3 gap-2.5 mb-5">
+                <div class="bg-sky-50 rounded-2xl p-3 border border-sky-200">
+                    <span class="text-[11px] font-semibold text-sky-600 block">TỔNG ĐIỂM</span>
+                    <span id="final-score-text" class="text-lg sm:text-xl font-bold text-sky-900">700 điểm</span>
+                </div>
+                <div class="bg-emerald-50 rounded-2xl p-3 border border-emerald-200">
+                    <span class="text-[11px] font-semibold text-emerald-600 block">CHẶNG ĐẠT ĐƯỢC</span>
+                    <span id="final-steps-text" class="text-lg sm:text-xl font-bold text-emerald-800">7 / 7 bậc</span>
+                </div>
+                <div class="bg-amber-50 rounded-2xl p-3 border border-amber-200">
+                    <span class="text-[11px] font-semibold text-amber-700 block">THỜI GIAN</span>
+                    <span id="final-time-text" class="text-lg sm:text-xl font-bold text-amber-900">0s</span>
+                </div>
+            </div>
 
-    /* ----------------------------------------------------
-       2. BỘ CƠ SỞ DỮ LIỆU CÂU HỎI (BÀI 13 - VẬT LÍ 10)
-       ---------------------------------------------------- */
-    const QUESTIONS_DATA = [
-      {
-        id: 1,
-        level: "⭐ Nhận biết",
-        question: "Một chất điểm chịu tác dụng đồng thời của hai lực F⃗₁ và F⃗₂ thì độ lớn hợp lực F của chúng luôn thỏa mãn hệ thức nào?",
-        options: [
-          "F = F₁ - F₂",
-          "F = F₁ + F₂",
-          "|F₁ - F₂| ≤ F ≤ F₁ + F₂",
-          "F² = F₁² + F₂²"
-        ],
-        correctIndex: 2,
-        explanation: "Theo bất đẳng thức độ lớn hợp lực: Độ lớn hợp lực của hai lực đồng quy luôn nằm trong đoạn từ giá trị cực tiểu đến giá trị cực đại: |F₁ - F₂| ≤ F ≤ F₁ + F₂."
-      },
-      {
-        id: 2,
-        level: "⭐ Nhận biết",
-        question: "Hợp lực của hai lực F⃗₁ và F⃗₂ hợp với nhau một góc α có độ lớn được tính bằng công thức nào?",
-        options: [
-          "F = F₁ + F₂",
-          "F = F₁ - F₂",
-          "F² = F₁² + F₂² - 2F₁F₂ cosα",
-          "F² = F₁² + F₂² + 2F₁F₂ cosα"
-        ],
-        correctIndex: 3,
-        explanation: "Theo định lí hàm cos mở rộng trong hình bình hành, độ lớn hợp lực được tính bằng công thức: F² = F₁² + F₂² + 2F₁F₂ cosα (chú ý dấu dương +2F₁F₂cosα)."
-      },
-      {
-        id: 3,
-        level: "⭐⭐ Thông hiểu",
-        question: "Một chất điểm chịu tác dụng của lực F⃗ có độ lớn 20 N. Biết hai lực thành phần vuông góc với nhau và F₁ = 12 N. Độ lớn của lực F₂ là:",
-        options: [
-          "8 N",
-          "16 N",
-          "32 N",
-          "20 N"
-        ],
-        correctIndex: 1,
-        explanation: "Vì hai lực thành phần vuông góc với nhau nên F² = F₁² + F₂² ⇒ F₂ = √(F² - F₁²) = √(20² - 12²) = √(400 - 144) = √256 = 16 N."
-      },
-      {
-        id: 4,
-        level: "⭐⭐ Thông hiểu",
-        question: "Hai lực đồng quy có độ lớn lần lượt là 6 N và 8 N, có phương vuông góc với nhau. Độ lớn hợp lực của hai lực này là:",
-        options: [
-          "4 N",
-          "10 N",
-          "2 N",
-          "48 N"
-        ],
-        correctIndex: 1,
-        explanation: "Vì hai lực vuông góc với nhau (α = 90°), ta có: F = √(F₁² + F₂²) = √(6² + 8²) = √(36 + 64) = √100 = 10 N."
-      },
-      {
-        id: 5,
-        level: "⭐⭐ Thông hiểu",
-        question: "Hai lực khác phương có độ lớn bằng 9 N và 12 N. Hợp lực của hai lực này không thể có độ lớn nào sau đây?",
-        options: [
-          "2 N",
-          "15 N",
-          "11,1 N",
-          "21 N"
-        ],
-        correctIndex: 0,
-        explanation: "Ta có: |F₁ - F₂| ≤ F ≤ F₁ + F₂ ⇔ |9 - 12| ≤ F ≤ 9 + 12 ⇔ 3 N ≤ F ≤ 21 N. Do đó, giá trị 2 N nằm ngoài khoảng cho phép."
-      },
-      {
-        id: 6,
-        level: "⭐⭐⭐ Vận dụng",
-        question: "Một chất điểm chịu tác dụng của hai lực có độ lớn 18 N và 24 N. Biết hợp lực của hai lực này có giá trị 30 N, góc α tạo bởi hai lực này là:",
-        options: [
-          "90°",
-          "30°",
-          "45°",
-          "60°"
-        ],
-        correctIndex: 0,
-        explanation: "Nhận xét: 18² + 24² = 324 + 576 = 900 = 30². Thỏa mãn định lí Pythagore (F² = F₁² + F₂²), suy ra hai lực này vuông góc với nhau, góc α = 90°."
-      },
-      {
-        id: 7,
-        level: "⭐⭐⭐ Vận dụng",
-        question: "Hai tàu kéo cùng kéo một sà lan với lực kéo mỗi tàu bằng 8000 N, góc giữa hai dây cáp kéo bằng 30°. Độ lớn hợp lực tác dụng lên sà lan là:",
-        options: [
-          "15455 N",
-          "16000 N",
-          "11314 N",
-          "8000 N"
-        ],
-        correctIndex: 0,
-        explanation: "Với F₁ = F₂ = 8000 N và góc α = 30°: F = 2F₁cos(α/2) = 2 · 8000 · cos(15°) ≈ 15455 N."
-      },
-      {
-        id: 8,
-        level: "⭐⭐⭐⭐ Vận dụng cao",
-        question: "Một con nhện treo mình dưới sợi tơ thẳng đứng thì bị gió thổi theo phương ngang làm dây lệch góc 30° so với phương thẳng đứng. Biết trọng lượng P = 0,1 N. Khi cân bằng, lực gió tác dụng lên con nhện là:",
-        options: [
-          "0,173 N",
-          "0,058 N",
-          "0,100 N",
-          "0,200 N"
-        ],
-        correctIndex: 1,
-        explanation: "Khi con nhện cân bằng dưới tác dụng của 3 lực (P⃗, F⃗_gió, T⃗), ta có: tan(30°) = F_gió / P ⇒ F_gió = P · tan(30°) = 0,1 · (1/√3) ≈ 0,058 N."
-      },
-      {
-        id: 9,
-        level: "⭐⭐⭐⭐ Vận dụng cao",
-        question: "Vật chịu tác dụng đồng thời của bốn lực trong mặt phẳng ngang: F₁ = 10 N (Đông), F₂ = 20 N (Bắc), F₃ = 22 N (Tây), F₄ = 36 N (Nam). Độ lớn hợp lực tác dụng lên vật là:",
-        options: [
-          "20 N",
-          "28 N",
-          "14 N",
-          "52 N"
-        ],
-        correctIndex: 0,
-        explanation: "Hợp lực Đông - Tây: F₁₃ = |F₁ - F₃| = |10 - 22| = 12 N (hướng Tây). Hợp lực Bắc - Nam: F₂₄ = |F₂ - F₄| = |20 - 36| = 16 N (hướng Nam). Vì F⃗₁₃ ⊥ F⃗₂₄ ⇒ F = √(12² + 16²) = 20 N."
-      },
-      {
-        id: 10,
-        level: "⭐⭐⭐⭐ Vận dụng cao",
-        question: "Một cái đèn trọng lượng P = 25 N được treo cân bằng vào hai sợi dây giống nhau hợp với nhau một góc 60°. Lực căng T của mỗi sợi dây là:",
-        options: [
-          "25,0 N",
-          "12,5 N",
-          "14,4 N",
-          "28,8 N"
-        ],
-        correctIndex: 2,
-        explanation: "Khi đèn cân bằng: Hợp lực của hai lực căng cân bằng với trọng lực P⃗: 2 · T · cos(60° / 2) = P ⇒ 2 · T · cos(30°) = 25 ⇒ T = 25 / (2 · cos 30°) = 25 / √3 ≈ 14,4 N."
-      }
-    ];
+            <!-- Bảng xếp hạng cả lớp cập nhật thời gian thực ngay sau khi làm xong -->
+            <div class="text-left bg-slate-50 rounded-2xl border border-slate-200 p-3.5 mb-5">
+                <div class="flex items-center justify-between mb-2.5">
+                    <h3 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+                        <span>📊 Bảng xếp hạng lớp học</span>
+                        <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                            Trực tiếp
+                        </span>
+                    </h3>
+                    <span id="victory-total-players" class="text-xs font-semibold text-slate-500">0 học sinh</span>
+                </div>
+                <div id="victory-leaderboard-list" class="max-h-52 overflow-y-auto space-y-1.5 pr-1">
+                    <!-- Danh sách xếp hạng cập nhật thời gian thực -->
+                </div>
+            </div>
 
-    /* ----------------------------------------------------
-       3. HỆ THỐNG ÂM THANH NỘI BỘ (WEB AUDIO API SYNTHESIZER)
-       ---------------------------------------------------- */
-    class SoundEngine {
-      constructor() {
-        this.ctx = null;
-        this.enabled = true;
-      }
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button onclick="restartCurrentQuiz()" class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-bold text-sm shadow-md transition-all">
+                    🔄 Chơi lại lượt mới
+                </button>
+                <button onclick="closeVictoryModal()" class="py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition-colors">
+                    Đóng
+                </button>
+            </div>
+        </div>
+    </div>
 
-      initContext() {
-        if (!this.ctx) {
-          const AudioContext = window.AudioContext || window.webkitAudioContext;
-          this.ctx = new AudioContext();
-        }
-        if (this.ctx && this.ctx.state === 'suspended') {
-          this.ctx.resume();
-        }
-      }
+    <!-- MODAL NHẬP HỌ TÊN HỌC SINH THAM GIA LỚP HỌC -->
+    <div id="student-join-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/65 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-sky-200 animate-pop">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500 to-emerald-500 flex items-center justify-center text-2xl text-white shadow-md">
+                    🧑‍🎓
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-slate-800">Tham Gia Đường Lên Đỉnh</h3>
+                    <p class="text-xs text-slate-500">Nhập thông tin để ghi danh lên bảng xếp hạng lớp</p>
+                </div>
+            </div>
 
-      playClick() {
-        if (!this.enabled) return;
-        this.initContext();
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(600, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.05);
-        gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start();
-        osc.stop(this.ctx.currentTime + 0.05);
-      }
+            <form onsubmit="submitStudentInfo(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">Họ và tên học sinh *</label>
+                    <input type="text" id="student-name-input" required placeholder="Ví dụ: Nguyễn Văn An" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none text-sm sm:text-base font-medium">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">Lớp / Nhóm (không bắt buộc)</label>
+                    <input type="text" id="student-class-input" placeholder="Ví dụ: 11A1" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none text-sm sm:text-base font-medium">
+                </div>
 
-      playCorrect() {
-        if (!this.enabled) return;
-        this.initContext();
-        const now = this.ctx.currentTime;
-        const notes = [523.25, 659.25, 783.99, 1046.50];
-        notes.forEach((freq, idx) => {
-          const osc = this.ctx.createOscillator();
-          const gain = this.ctx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(freq, now + idx * 0.07);
-          gain.gain.setValueAtTime(0.2, now + idx * 0.07);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.25);
-          osc.connect(gain);
-          gain.connect(this.ctx.destination);
-          osc.start(now + idx * 0.07);
-          osc.stop(now + idx * 0.07 + 0.25);
-        });
-      }
+                <!-- Hiển thị đầy đủ ID người dùng để dễ nhận diện trong lớp -->
+                <div class="bg-slate-50 rounded-xl p-2.5 border border-slate-200 text-[11px] text-slate-500 break-all">
+                    <span class="font-semibold text-slate-600">Mã định danh thiết bị:</span>
+                    <span id="display-full-userid" class="font-mono text-slate-700">Đang kết nối...</span>
+                </div>
 
-      playWrong() {
-        if (!this.enabled) return;
-        this.initContext();
-        const now = this.ctx.currentTime;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(180, now);
-        osc.frequency.linearRampToValueAtTime(110, now + 0.25);
-        gain.gain.setValueAtTime(0.25, now);
-        gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.25);
-      }
+                <div class="pt-1 flex flex-col gap-2.5">
+                    <button type="submit" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-sky-600 to-emerald-600 hover:from-sky-700 hover:to-emerald-700 text-white font-bold text-sm sm:text-base shadow-md transition-all active:scale-95">
+                        🚀 Vào thi đấu ngay
+                    </button>
+                    <button type="button" onclick="enterAsTeacher()" class="w-full py-2.5 px-4 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-semibold text-xs sm:text-sm transition-colors">
+                        👩‍🏫 Tôi là Giáo viên (Mở bảng thiết lập đề)
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-      playFanfare() {
-        if (!this.enabled) return;
-        this.initContext();
-        const now = this.ctx.currentTime;
-        const notes = [440, 554.37, 659.25, 880];
-        notes.forEach((freq, i) => {
-          const osc = this.ctx.createOscillator();
-          const gain = this.ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(freq, now + i * 0.12);
-          gain.gain.setValueAtTime(0.3, now + i * 0.12);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.4);
-          osc.connect(gain);
-          gain.connect(this.ctx.destination);
-          osc.start(now + i * 0.12);
-          osc.stop(now + i * 0.12 + 0.4);
-        });
-      }
-    }
+    <!-- MODAL BẢNG XẾP HẠNG LỚP HỌC (DÀNH CHO CẢ LỚP & GIÁO VIÊN CHIẾU TRÊN MÀN HÌNH) -->
+    <div id="leaderboard-modal" class="fixed inset-0 z-40 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-indigo-200 overflow-hidden my-auto animate-pop">
+            <div class="bg-gradient-to-r from-indigo-600 via-blue-600 to-sky-600 px-6 py-4 flex items-center justify-between text-white">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">🏆</span>
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-bold flex items-center gap-2">
+                            <span>Bảng Xếp Hạng Lớp Học</span>
+                            <span class="text-[11px] font-bold uppercase tracking-wider bg-emerald-400/25 border border-emerald-200/50 text-emerald-100 px-2 py-0.5 rounded-full">
+                                Thời gian thực
+                            </span>
+                        </h3>
+                        <p id="leaderboard-topic-subtitle" class="text-xs text-sky-100">Chủ đề: Giao thoa sóng (Vật Lí 11)</p>
+                    </div>
+                </div>
+                <button onclick="closeLeaderboardModal()" class="w-9 h-9 rounded-xl bg-white/15 hover:bg-white/25 flex items-center justify-center text-white font-bold transition-colors">
+                    ✕
+                </button>
+            </div>
 
-    const sound = new SoundEngine();
+            <div class="p-5 sm:p-6">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3 text-xs sm:text-sm">
+                    <span id="modal-leaderboard-summary" class="font-semibold text-slate-600">
+                        Đang cập nhật dữ liệu lớp học...
+                    </span>
+                    <span class="text-xs text-slate-400">Tự động xếp hạng theo Điểm cao nhất & Thời gian nhanh nhất</span>
+                </div>
 
-    /* ----------------------------------------------------
-       4. HIỆU ỨNG NỀN VŨ TRỤ & BẮN PHÁO HOA (CANVAS)
-       ---------------------------------------------------- */
-    const spaceCanvas = document.getElementById('spaceCanvas');
-    const spaceCtx = spaceCanvas.getContext('2d');
-    let stars = [];
+                <div id="modal-leaderboard-list" class="max-h-[55vh] overflow-y-auto space-y-2 pr-1">
+                    <!-- Danh sách học sinh toàn lớp sẽ hiển thị ở đây -->
+                </div>
+            </div>
 
-    function resizeCanvas() {
-      spaceCanvas.width = window.innerWidth;
-      spaceCanvas.height = window.innerHeight;
-      stars = [];
-      for (let i = 0; i < 90; i++) {
-        stars.push({
-          x: Math.random() * spaceCanvas.width,
-          y: Math.random() * spaceCanvas.height,
-          radius: Math.random() * 1.6 + 0.4,
-          speed: Math.random() * 0.35 + 0.1,
-          alpha: Math.random() * 0.8 + 0.2
-        });
-      }
-    }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
+            <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex justify-end">
+                <button onclick="closeLeaderboardModal()" class="px-5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-sm transition-colors">
+                    Đóng bảng xếp hạng
+                </button>
+            </div>
+        </div>
+    </div>
 
-    function animateSpace() {
-      spaceCtx.clearRect(0, 0, spaceCanvas.width, spaceCanvas.height);
-      for (let star of stars) {
-        star.y -= star.speed;
-        if (star.y < 0) {
-          star.y = spaceCanvas.height;
-          star.x = Math.random() * spaceCanvas.width;
-        }
-        spaceCtx.fillStyle = `rgba(0, 242, 254, ${star.alpha})`;
-        spaceCtx.beginPath();
-        spaceCtx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-        spaceCtx.fill();
-      }
-      requestAnimationFrame(animateSpace);
-    }
-    animateSpace();
+    <!-- KẾT NỐI ĐỒNG BỘ LỚP HỌC THỜI GIAN THỰC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // Hệ thống Confetti chúc mừng
-    const confettiCanvas = document.getElementById('confettiCanvas');
-    const confettiCtx = confettiCanvas.getContext('2d');
-    let confettiParticles = [];
-    let confettiActive = false;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+        let unsubSession = null;
+        let unsubLeaderboard = null;
 
-    function launchConfetti() {
-      confettiCanvas.width = window.innerWidth;
-      confettiCanvas.height = window.innerHeight;
-      confettiParticles = [];
-      const colors = ['#00f2fe', '#4facfe', '#ffbc00', '#06d6a0', '#ffffff'];
-      for (let i = 0; i < 120; i++) {
-        confettiParticles.push({
-          x: confettiCanvas.width / 2,
-          y: confettiCanvas.height / 2,
-          vx: (Math.random() - 0.5) * 14,
-          vy: (Math.random() - 0.5) * 14 - 3,
-          color: colors[Math.floor(Math.random() * colors.length)],
-          size: Math.random() * 8 + 4,
-          gravity: 0.25,
-          alpha: 1
-        });
-      }
-      confettiActive = true;
-    }
+        async function initClassroomCloud() {
+            try {
+                if (typeof __firebase_config === 'undefined' || !__firebase_config) {
+                    console.warn("Chưa có cấu hình đồng bộ đám mây.");
+                    return;
+                }
+                const firebaseConfig = JSON.parse(__firebase_config);
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
 
-    function updateConfetti() {
-      if (!confettiActive) return;
-      confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-      let alive = false;
-      for (let p of confettiParticles) {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += p.gravity;
-        p.alpha -= 0.008;
-        if (p.alpha > 0) {
-          alive = true;
-          confettiCtx.fillStyle = p.color;
-          confettiCtx.globalAlpha = p.alpha;
-          confettiCtx.fillRect(p.x, p.y, p.size, p.size);
-        }
-      }
-      confettiCtx.globalAlpha = 1;
-      if (alive) {
-        requestAnimationFrame(updateConfetti);
-      } else {
-        confettiActive = false;
-        confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-      }
-    }
+                // Xác thực trước khi thực hiện mọi thao tác dữ liệu
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
 
-    /* ----------------------------------------------------
-       5. QUẢN LÝ ĐỊNH DANH HỌC SINH & BẢNG XẾP HẠNG (LEADERBOARD)
-       ---------------------------------------------------- */
-    let currentStudent = {
-      name: "",
-      className: ""
-    };
-    let latestRecordId = null;
+                currentUser = auth.currentUser;
+                if (!currentUser) return;
 
-    // Lấy danh sách xếp hạng từ localStorage và sắp xếp chuẩn
-    function getSortedLeaderboard() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY_LEADERBOARD);
-        const list = raw ? JSON.parse(raw) : [];
-        // Xếp hạng ưu tiên:
-        // 1. Số lượng câu hỏi trả lời đúng (cao -> thấp)
-        // 2. Điểm XP tích lũy (cao -> thấp)
-        // 3. Thời gian hoàn thành (nhanh -> chậm)
-        return list.sort((a, b) => {
-          if (b.correctCount !== a.correctCount) {
-            return b.correctCount - a.correctCount;
-          }
-          if (b.xp !== a.xp) {
-            return b.xp - a.xp;
-          }
-          return a.timeUsed - b.timeUsed;
-        });
-      } catch (e) {
-        console.warn("Không thể đọc dữ liệu bảng xếp hạng:", e);
-        return [];
-      }
-    }
+                if (window.onCloudUserReady) {
+                    window.onCloudUserReady(currentUser.uid);
+                }
 
-    // Lưu thành tích học sinh sau khi hoàn thành
-    function saveStudentResultToLeaderboard(record) {
-      try {
-        const list = getSortedLeaderboard();
-        list.push(record);
-        localStorage.setItem(STORAGE_KEY_LEADERBOARD, JSON.stringify(list));
-        updateHeaderRankBadge();
-      } catch (e) {
-        console.warn("Không thể lưu bảng xếp hạng:", e);
-      }
-    }
-
-    // Định dạng giây thành mm:ss
-    function formatSecondsToMMSS(totalSec) {
-      const m = Math.floor(totalSec / 60);
-      const s = totalSec % 60;
-      return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-    }
-
-    // Chống XSS khi hiển thị tên học sinh
-    function escapeHtml(str) {
-      const div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
-    }
-
-    // Cập nhật số lượng học sinh trên nút Header
-    function updateHeaderRankBadge() {
-      const list = getSortedLeaderboard();
-      document.getElementById('headerRankCount').innerText = list.length;
-    }
-
-    // Đổ dữ liệu vào bảng xếp hạng (dùng chung cho cả Màn hình kết quả và Modal)
-    function renderLeaderboardTable(tbodyId, highlightId = null) {
-      const tbody = document.getElementById(tbodyId);
-      const list = getSortedLeaderboard();
-
-      if (list.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="6" style="text-align: center; padding: 22px; color: var(--text-muted); font-style: italic;">
-              Chưa có dữ liệu học sinh nào. Hãy nhập tên và hoàn thành nhiệm vụ để ghi danh đầu tiên!
-            </td>
-          </tr>
-        `;
-        return;
-      }
-
-      tbody.innerHTML = list.map((item, idx) => {
-        const rank = idx + 1;
-        let rankBadgeHtml = `<span class="rank-badge rank-other">#${rank}</span>`;
-        if (rank === 1) rankBadgeHtml = `<span class="rank-badge rank-1">🥇 1</span>`;
-        else if (rank === 2) rankBadgeHtml = `<span class="rank-badge rank-2">🥈 2</span>`;
-        else if (rank === 3) rankBadgeHtml = `<span class="rank-badge rank-3">🥉 3</span>`;
-
-        const isCurrent = highlightId && item.id === highlightId;
-        const rowClass = isCurrent ? 'current-player-row' : '';
-        const youTag = isCurrent ? ' <span style="color: var(--primary); font-size: 11px;">(Vừa hoàn thành)</span>' : '';
-
-        return `
-          <tr class="${rowClass}">
-            <td>${rankBadgeHtml}</td>
-            <td>${escapeHtml(item.name)}${youTag}</td>
-            <td style="color: #cbd5e1;">${escapeHtml(item.className || '—')}</td>
-            <td><span class="score-pill">${item.correctCount} / ${item.totalQuestions} câu</span></td>
-            <td style="color: var(--primary); font-weight: 700;">${item.xp} XP</td>
-            <td style="font-family: monospace; color: var(--accent);">${formatSecondsToMMSS(item.timeUsed)}</td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    // Hiển thị thông báo Toast nhỏ gọn
-    function showToast(message) {
-      const toast = document.getElementById('toastNotice');
-      toast.innerText = message;
-      toast.classList.add('show');
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 2600);
-    }
-
-    // Sao chép bảng xếp hạng dạng văn bản phân tách tab (dán thẳng vào Excel/Google Sheets)
-    function copyLeaderboardToClipboard() {
-      sound.playClick();
-      const list = getSortedLeaderboard();
-      if (list.length === 0) {
-        showToast("Chưa có dữ liệu xếp hạng để sao chép!");
-        return;
-      }
-
-      const header = "Hạng\tHọ và tên học sinh\tLớp / Mã\tSố câu đúng\tTổng số câu\tĐiểm XP\tThời gian hoàn thành";
-      const rows = list.map((item, idx) => {
-        return `${idx + 1}\t${item.name}\t${item.className || ''}\t${item.correctCount}\t${item.totalQuestions}\t${item.xp}\t${formatSecondsToMMSS(item.timeUsed)}`;
-      });
-      const textContent = [header, ...rows].join('\n');
-
-      const tempArea = document.createElement('textarea');
-      tempArea.value = textContent;
-      document.body.appendChild(tempArea);
-      tempArea.select();
-      try {
-        document.execCommand('copy');
-        showToast("✓ Đã sao chép bảng điểm (có thể dán trực tiếp vào Excel)!");
-      } catch (err) {
-        showToast("Không thể sao chép tự động.");
-      }
-      document.body.removeChild(tempArea);
-    }
-
-    // Cơ chế xóa bảng xếp hạng an toàn 2 bước (không dùng confirm())
-    function setupClearLeaderboardButton(btnId) {
-      const btn = document.getElementById(btnId);
-      let confirmTimeout = null;
-
-      btn.addEventListener('click', () => {
-        sound.playClick();
-        if (btn.dataset.confirming === "true") {
-          localStorage.removeItem(STORAGE_KEY_LEADERBOARD);
-          latestRecordId = null;
-          updateHeaderRankBadge();
-          renderLeaderboardTable('resultLeaderboardBody');
-          renderLeaderboardTable('modalLeaderboardBody');
-          btn.dataset.confirming = "false";
-          btn.innerText = btnId === 'clearResultRankBtn' ? '🗑️ Xóa BXH' : '🗑️ Xóa dữ liệu BXH';
-          clearTimeout(confirmTimeout);
-          showToast("Đã xóa toàn bộ dữ liệu bảng xếp hạng!");
-        } else {
-          btn.dataset.confirming = "true";
-          btn.innerText = "⚠️ Bấm lần nữa để xác nhận xóa";
-          confirmTimeout = setTimeout(() => {
-            btn.dataset.confirming = "false";
-            btn.innerText = btnId === 'clearResultRankBtn' ? '🗑️ Xóa BXH' : '🗑️ Xóa dữ liệu BXH';
-          }, 3500);
-        }
-      });
-    }
-
-    /* ----------------------------------------------------
-       6. GAME STATE & LOGIC ENGINE
-       ---------------------------------------------------- */
-    let currentQuestionIndex = 0;
-    let scoreXP = 0;
-    let currentStreak = 0;
-    let maxStreak = 0;
-    let correctAnswersCount = 0;
-    let timerRemaining = TOTAL_TIME_SECONDS;
-    let timerInterval = null;
-    let userAnswersLog = [];
-
-    // Khởi tạo thương hiệu lên giao diện
-    function setupBranding() {
-      document.getElementById('brandLogo').innerText = BRAND_CONFIG.logoText;
-      document.getElementById('headerGameTitle').innerText = BRAND_CONFIG.title;
-      document.getElementById('headerSlogan').innerText = BRAND_CONFIG.slogan;
-      document.getElementById('footerBrandName').innerText = BRAND_CONFIG.name;
-      document.getElementById('footerPhone').innerText = BRAND_CONFIG.phone;
-      document.getElementById('brandWatermark').innerText = `${BRAND_CONFIG.name} • ${BRAND_CONFIG.title}`;
-      updateHeaderRankBadge();
-    }
-
-    // Chuyển đổi màn hình
-    function showPanel(panelId) {
-      document.querySelectorAll('.screen-panel').forEach(p => p.classList.remove('active'));
-      document.getElementById(panelId).classList.add('active');
-    }
-
-    // Kiểm tra tên học sinh và bắt đầu game
-    function validateAndStartMission(useExistingStudent = false) {
-      const nameInput = document.getElementById('studentNameInput');
-      const classInput = document.getElementById('studentClassInput');
-      const errorMsg = document.getElementById('studentFormError');
-
-      if (!useExistingStudent) {
-        const enteredName = nameInput.value.trim();
-        const enteredClass = classInput.value.trim();
-
-        if (!enteredName) {
-          sound.playWrong();
-          nameInput.classList.add('input-error');
-          errorMsg.style.display = 'flex';
-          nameInput.focus();
-          return;
+                subscribeClassroomSession();
+                subscribeClassroomLeaderboard();
+            } catch (err) {
+                console.error("Lỗi khởi tạo kết nối lớp học:", err);
+            }
         }
 
-        nameInput.classList.remove('input-error');
-        errorMsg.style.display = 'none';
-        currentStudent = {
-          name: enteredName,
-          className: enteredClass || "Tự do"
+        // Lắng nghe đề thi chung mà giáo viên phát cho cả lớp theo thời gian thực
+        function subscribeClassroomSession() {
+            if (!db || !currentUser) return;
+            if (unsubSession) unsubSession();
+
+            const sessionDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'classroom_sessions', 'current');
+            unsubSession = onSnapshot(
+                sessionDocRef,
+                (snap) => {
+                    if (snap.exists() && window.onRemoteSessionUpdate) {
+                        window.onRemoteSessionUpdate(snap.data());
+                    }
+                },
+                (error) => {
+                    console.error("Lỗi đồng bộ đề bài lớp học:", error);
+                }
+            );
+        }
+
+        // Lắng nghe bảng xếp hạng tất cả học sinh trong lớp theo thời gian thực
+        function subscribeClassroomLeaderboard() {
+            if (!db || !currentUser) return;
+            if (unsubLeaderboard) unsubLeaderboard();
+
+            const leaderboardColRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+            unsubLeaderboard = onSnapshot(
+                leaderboardColRef,
+                (snapshot) => {
+                    const entries = [];
+                    snapshot.forEach((docSnap) => {
+                        entries.push({ id: docSnap.id, ...docSnap.data() });
+                    });
+                    if (window.onRemoteLeaderboardUpdate) {
+                        window.onRemoteLeaderboardUpdate(entries);
+                    }
+                },
+                (error) => {
+                    console.error("Lỗi đồng bộ bảng xếp hạng:", error);
+                }
+            );
+        }
+
+        // Giáo viên phát bộ đề & số bậc leo núi lên hệ thống cho cả lớp
+        async function publishTeacherSession(payload) {
+            if (!db || !currentUser) return false;
+            try {
+                const sessionDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'classroom_sessions', 'current');
+                await setDoc(sessionDocRef, {
+                    ...payload,
+                    updatedBy: currentUser.uid,
+                    updatedAt: Date.now()
+                });
+                return true;
+            } catch (err) {
+                console.error("Lỗi phát đề cho lớp:", err);
+                return false;
+            }
+        }
+
+        // Cập nhật tiến độ & điểm số của học sinh lên bảng xếp hạng thời gian thực
+        async function syncStudentProgress(progressData) {
+            if (!db || !currentUser) return;
+            try {
+                const studentDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'leaderboard', currentUser.uid);
+                await setDoc(studentDocRef, {
+                    userId: currentUser.uid,
+                    ...progressData,
+                    updatedAt: Date.now()
+                }, { merge: true });
+            } catch (err) {
+                console.error("Lỗi cập nhật điểm học sinh:", err);
+            }
+        }
+
+        // Giáo viên xóa bảng xếp hạng cũ để bắt đầu vòng chơi mới
+        async function clearClassroomLeaderboard() {
+            if (!db || !currentUser) return false;
+            try {
+                const leaderboardColRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+                const snap = await getDocs(leaderboardColRef);
+                const deletePromises = [];
+                snap.forEach((d) => {
+                    deletePromises.push(deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'leaderboard', d.id)));
+                });
+                await Promise.all(deletePromises);
+                return true;
+            } catch (err) {
+                console.error("Lỗi xóa bảng xếp hạng:", err);
+                return false;
+            }
+        }
+
+        window.physicCloud = {
+            publishTeacherSession,
+            syncStudentProgress,
+            clearClassroomLeaderboard,
+            getUserId: () => currentUser ? currentUser.uid : null
         };
-      }
 
-      sound.playClick();
-      currentQuestionIndex = 0;
-      scoreXP = 0;
-      currentStreak = 0;
-      maxStreak = 0;
-      correctAnswersCount = 0;
-      timerRemaining = TOTAL_TIME_SECONDS;
-      userAnswersLog = [];
+        initClassroomCloud();
+    </script>
 
-      // Cập nhật thông tin học sinh lên thanh trạng thái
-      document.getElementById('activeCadetName').innerText = currentStudent.name;
-      document.getElementById('activeCadetClass').innerText = `Lớp / Mã: ${currentStudent.className}`;
-      document.getElementById('cadetStatusBar').style.display = 'flex';
+    <script>
+        /* =========================================================================
+           1. NGÂN HÀNG CÂU HỎI MÔN VẬT LÍ 11 - CHỦ ĐỀ: GIAO THOA SÓNG
+              (Đầy đủ 21 câu hỏi trắc nghiệm nhiều phương án lựa chọn từ file giáo viên gửi)
+           ========================================================================= */
+        const DEFAULT_PHYSICS_QUESTIONS = [
+            {
+                question: "Hai nguồn phát sóng được gọi là hai nguồn kết hợp nếu chúng dao động",
+                options: [
+                    "cùng phương, cùng tần số và có hiệu số pha không đổi theo thời gian.",
+                    "cùng phương, cùng biên độ và cùng pha ban đầu.",
+                    "cùng tần số và cùng biên độ dao động trong cùng một môi trường.",
+                    "cùng chu kì nhưng có hiệu số pha thay đổi theo thời gian."
+                ],
+                answer: 0,
+                topic: "Giao thoa sóng - Vật Lí 11"
+            },
+            {
+                question: "Trong hiện tượng giao thoa sóng trên mặt nước với hai nguồn kết hợp dao động cùng pha, các điểm dao động với biên độ cực đại có hiệu đường đi của sóng từ hai nguồn đến điểm đó bằng",
+                options: [
+                    "một số nguyên lần bước sóng (d₂ - d₁ = kλ).",
+                    "một số bán nguyên lần bước sóng (d₂ - d₁ = (k + 0,5)λ).",
+                    "một số lẻ lần nửa bước sóng (d₂ - d₁ = (2k + 1)λ/2).",
+                    "một số nguyên lần nửa bước sóng (d₂ - d₁ = kλ/2)."
+                ],
+                answer: 0,
+                topic: "Giao thoa sóng - Vật Lí 11"
+            },
+            {
+                question: "Trong thí nghiệm giao thoa sóng nước với hai nguồn kết hợp dao động cùng pha, các điểm dao động với biên độ cực tiểu (triệt tiêu dao động) có hiệu khoảng cách tới hai nguồn bằng",
+                options: [
+                    "một số nguyên lần bước sóng.",
+                    "một số bán nguyên lần bước sóng (d₂ - d₁ = (k + 0,5)λ).",
+                    "một số chẵn lần nửa bước sóng.",
+                    "một số lẻ lần một phần tư bước sóng."
+                ],
+                answer: 1,
+                topic: "Giao thoa sóng - Vật Lí 11"
+            },
+            {
+                question: "Để khảo sát giao thoa sóng cơ, người ta bố trí trên mặt nước hai nguồn kết hợp S₁ và S₂ dao động điều hòa theo phương thẳng đứng, cùng pha. Các phần tử nước nằm trên đường trung trực của đoạn thẳng S₁S₂ sẽ",
+                options: [
+                    "dao động với biên độ cực đại.",
+                    "dao động với biên độ cực tiểu.",
+                    "hoàn toàn không dao động.",
+                    "dao động với biên độ bằng nửa biên độ cực đại."
+                ],
+                answer: 0,
+                topic: "Giao thoa sóng - Vật Lí 11"
+            },
+            {
+                question: "Trong hiện tượng giao thoa sóng trên mặt nước của hai nguồn kết hợp cùng pha, khoảng cách giữa hai cực đại liên tiếp nằm trên đoạn thẳng nối hai tâm sóng bằng",
+                options: [
+                    "một bước sóng (λ).",
+                    "hai lần bước sóng (2λ).",
+                    "một nửa bước sóng (λ/2).",
+                    "một phần tư bước sóng (λ/4)."
+                ],
+                answer: 2,
+                topic: "Giao thoa sóng - Vật Lí 11"
+            },
+            {
+                question: "Trên đoạn thẳng nối hai nguồn sóng kết hợp đồng pha trên mặt nước, khoảng cách ngắn nhất giữa một điểm dao động với biên độ cực đại và một điểm dao động với biên độ cực tiểu là",
+                options: [
+                    "λ/2.",
+                    "λ/4.",
+                    "λ.",
+                    "λ/8."
+                ],
+                answer: 1,
+                topic: "Giao thoa sóng - Vật Lí 11"
+            },
+            {
+                question: "Trong hiện tượng giao thoa sóng trên mặt nước của hai nguồn kết hợp đồng pha, quỹ tích các điểm dao động với biên độ cực đại hoặc cực tiểu là",
+                options: [
+                    "các đường cong hyperbol nhận hai nguồn làm tiêu điểm.",
+                    "các đường thẳng song song cách đều nhau.",
+                    "các đường tròn đồng tâm có tâm tại trung điểm của hai nguồn.",
+                    "các đường parabol đối xứng qua trục nối hai nguồn."
+                ],
+                answer: 0,
+                topic: "Giao thoa sóng - Vật Lí 11"
+            },
+            {
+                question: "Trên mặt nước có hai nguồn kết hợp S₁, S₂ dao động cùng pha với bước sóng λ. Độ lệch pha Δφ của hai sóng truyền từ S₁ và S₂ đến điểm M cách hai nguồn những khoảng d₁, d₂ được xác định bởi công thức",
+                options: [
+                    "Δφ = 2π(d₂ - d₁)/λ.",
+                    "Δφ = π(d₂ - d₁)/λ.",
+                    "Δφ = 2πλ/(d₂ - d₁).",
+                    "Δφ = πλ/(d₂ - d₁)."
+                ],
+                answer: 0,
+                topic: "Giao thoa sóng - Vật Lí 11"
+            },
+            {
+                question: "Trong một thí nghiệm giao thoa sóng nước, cần rung có gắn hai mũi nhọn dao động với tần số f = 40 Hz. Tốc độ truyền sóng trên mặt nước là v = 1,2 m/s. Bước sóng của sóng trên mặt nước là",
+                options: [
+                    "3 cm.",
+                    "4,8 cm.",
+                    "0,3 cm.",
+                    "30 cm."
+                ],
+                answer: 0,
+                topic: "Giao thoa sóng - Vật Lí 11"
+            },
+            {
+                question: "Thực hiện giao thoa sóng cơ trên mặt nước với hai nguồn kết hợp A và B dao động cùng pha, phát ra sóng có bước sóng λ = 2 cm. Tại điểm M cách A một đoạn d₁ = 16 cm và cách B một đoạn d₂ = 22 cm thuộc",
+                options: [
+                    "vân cực đại bậc 3.",
+                    "vân cực tiểu thứ 3.",
+                    "vân cực đại bậc 2.",
+                    "vân cực tiểu thứ 4."
+                ],
+                answer: 0,
+                topic: "Giao thoa sóng - Vật Lí 11"
+            },
+            {
+                question: "Trong thí nghiệm giao thoa sóng nước, hai nguồn kết hợp dao động cùng pha phát sóng có bước sóng λ = 4 cm. Điểm N trên mặt nước có khoảng cách đến hai nguồn lần lượt là d₁ = 12 cm và d₂ = 22 cm nằm trên",
+                options: [
+                    "đường cực đại thứ 2.",
+                    "đường cực tiểu thứ 3.",
+                    "đường cực tiểu thứ 2.",
+                    "đường cực đại thứ 3."
+                ],
+                answer: 1,
+                topic: "Giao thoa sóng - Vật Lí 11"
+            },
+            {
+                question: "Hiện tượng giao thoa ánh sáng là bằng chứng thực nghiệm quan trọng khẳng định",
+                options: [
+                    "ánh sáng có tính chất hạt.",
+                    "ánh sáng có bản chất sóng.",
+                    "ánh sáng là sóng cơ học dọc.",
+                    "ánh sáng không truyền được trong chân không."
+                ],
+                answer: 1,
+                topic: "Giao thoa sóng - Vật Lí 11"
+            },
+            {
+                question: "Để quan sát được hệ vân giao thoa ánh sáng ổn định và rõ nét trên màn quan sát, hai chùm sáng chiếu vào hai khe hẹp phải là",
+                options: [
+                    "hai chùm sáng kết hợp xuất phát từ cùng một nguồn sáng đơn sắc.",
+                    "hai chùm sáng phát ra từ hai bóng đèn dây tóc độc lập.",
+                    "hai chùm sáng có cường độ rất mạnh và bước sóng khác nhau.",
+                    "hai chùm sáng đơn sắc bất kì truyền trong không khí."
+                ],
+                answer: 0,
+                topic: "Giao thoa sóng - Vật Lí 11"
+            },
+            {
+                question: "Trong thí nghiệm Young về giao thoa ánh sáng, khoảng vân i được định nghĩa là khoảng cách",
+                options: [
+                    "giữa hai vân sáng hoặc hai vân tối liên tiếp trên màn.",
+                    "giữa hai vân sáng cùng bậc trên màn hứng vân.",
+                    "từ vân sáng trung tâm đến vân tối gần nó nhất.",
+                    "giữa vân sáng trung tâm đến vân sáng bậc 2."
+                ],
+                answer: 0,
+                topic: "Giao thoa sóng - Vật Lí 11"
+            },
+            {
+                question: "Trong thí nghiệm Young về giao thoa ánh sáng, khoảng cách giữa hai khe là a, khoảng cách từ hai khe đến màn là D, ánh sáng đơn sắc có bước sóng λ. Khoảng vân i trên màn được tính bằng công thức",
+                options: [
+                    "i = λD / a.",
+                    "i = λa / D.",
+                    "i = aD / λ.",
+                    "i = a / (λD)."
+                ],
+                answer: 0,
+                topic: "Giao thoa sóng - Vật Lí 11"
+            },
+            {
+                question: "Ứng dụng quan trọng của hiện tượng giao thoa ánh sáng qua khe Young trong thực hành là dùng để đo",
+                options: [
+                    "bước sóng λ của ánh sáng theo hệ thức λ = (a·i) / D.",
+                    "tốc độ ánh sáng theo hệ thức c = a·i·D.",
+                    "tần số ánh sáng theo hệ thức f = D / (a·i).",
+                    "chiết suất tuyệt đối của môi trường chân không."
+                ],
+                answer: 0,
+                topic: "Giao thoa sóng - Vật Lí 11"
+            },
+            {
+                question: "Trong thí nghiệm Young, cho khoảng cách hai khe a = 0,5 mm, khoảng cách từ hai khe đến màn D = 2 m. Chiếu ánh sáng đơn sắc có bước sóng λ = 0,5 μm. Khoảng vân i trên màn bằng",
+                options: [
+                    "2,0 mm.",
+                    "1,0 mm.",
+                    "0,5 mm.",
+                    "4,0 mm."
+                ],
+                answer: 0,
+                topic: "Giao thoa sóng - Vật Lí 11"
+            },
+            {
+                question: "Trong thí nghiệm Young về giao thoa ánh sáng, cho a = 1 mm, D = 2 m, chiếu bức xạ đơn sắc có bước sóng λ = 0,6 μm. Vị trí vân sáng bậc 4 cách vân sáng trung tâm một khoảng bằng",
+                options: [
+                    "4,8 mm.",
+                    "2,4 mm.",
+                    "3,6 mm.",
+                    "1,2 mm."
+                ],
+                answer: 0,
+                topic: "Giao thoa sóng - Vật Lí 11"
+            },
+            {
+                question: "Trong thí nghiệm Young, hai khe được chiếu bằng ánh sáng đơn sắc có khoảng vân đo được là i = 0,8 mm. Khoảng cách từ vân sáng trung tâm đến vân tối thứ 3 là",
+                options: [
+                    "2,0 mm.",
+                    "2,4 mm.",
+                    "1,6 mm.",
+                    "2,8 mm."
+                ],
+                answer: 0,
+                topic: "Giao thoa sóng - Vật Lí 11"
+            },
+            {
+                question: "Trong thí nghiệm Young, nếu giảm khoảng cách giữa hai khe còn một nửa (a' = a/2) và đồng thời tăng khoảng cách từ hai khe đến màn lên hai lần (D' = 2D) thì khoảng vân giao thoa trên màn sẽ",
+                options: [
+                    "tăng lên 4 lần.",
+                    "tăng lên 2 lần.",
+                    "giảm đi 4 lần.",
+                    "không đổi."
+                ],
+                answer: 0,
+                topic: "Giao thoa sóng - Vật Lí 11"
+            },
+            {
+                question: "Trong thí nghiệm Young về giao thoa ánh sáng, nếu thay bức xạ màu lam bằng bức xạ màu vàng và giữ nguyên các thông số hình học của thí nghiệm thì trên màn quan sát sẽ thấy",
+                options: [
+                    "khoảng vân tăng lên.",
+                    "khoảng vân giảm đi.",
+                    "khoảng vân không thay đổi.",
+                    "vị trí vân trung tâm bị lệch đi."
+                ],
+                answer: 0,
+                topic: "Giao thoa sóng - Vật Lí 11"
+            }
+        ];
 
-      document.getElementById('gameHud').style.display = 'grid';
-      document.getElementById('gaugeBox').style.display = 'flex';
+        /* =========================================================================
+           2. TRẠNG THÁI TOÀN CỤC CỦA TRÒ CHƠI
+           ========================================================================= */
+        let state = {
+            topicName: "Giao thoa sóng (Vật Lí 11)",
+            questionBank: [...DEFAULT_PHYSICS_QUESTIONS],
+            desiredSteps: 7,
+            selectionMode: 'random', // 'random' hoặc 'manual'
+            selectedQuestionIndices: [],
+            activeQuestions: [],
+            currentStepIndex: 0,
+            score: 0,
+            attemptsOnCurrent: 0,
+            isTransitioning: false,
+            stepCoordinates: [],
+            // Trạng thái lớp học & xếp hạng thời gian thực
+            userId: "",
+            studentName: "",
+            studentClass: "",
+            isTeacherRole: false,
+            sessionId: "default",
+            quizStartTime: Date.now(),
+            lastDurationSeconds: 0,
+            leaderboardEntries: []
+        };
 
-      updateHudDisplay();
-      showPanel('quizScreen');
-      loadQuestion(currentQuestionIndex);
-      startTimer();
-    }
+        /* =========================================================================
+           3. HỆ THỐNG ÂM THANH (NHẠC NỀN ĐỈNH VINH QUANG + TING TING + ÙUUUUU)
+           ========================================================================= */
+        let audioCtx = null;
+        let isBGMPlaying = false;
+        let bgmTimer = null;
+        let bgmNoteIndex = 0;
 
-    // Đồng hồ đếm ngược
-    function startTimer() {
-      if (timerInterval) clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
-        timerRemaining--;
-        updateHudTimer();
-        if (timerRemaining <= 0) {
-          clearInterval(timerInterval);
-          finishMission(false);
+        // Giai điệu hào hùng lấy cảm hứng từ điệp khúc "Đường Đến Ngày Vinh Quang"
+        const GLORY_MELODY = [
+            // "Cùng trèo lên đỉnh núi cao vời vợi..."
+            { f: 392.00, d: 0.35 }, // G4
+            { f: 392.00, d: 0.35 }, // G4
+            { f: 440.00, d: 0.35 }, // A4
+            { f: 523.25, d: 0.55 }, // C5
+            { f: 523.25, d: 0.35 }, // C5
+            { f: 587.33, d: 0.35 }, // D5
+            { f: 659.25, d: 0.70 }, // E5
+            { f: 0,      d: 0.25 },
+            // "Để ta khắc tên mình trên đời..."
+            { f: 659.25, d: 0.35 }, // E5
+            { f: 587.33, d: 0.35 }, // D5
+            { f: 523.25, d: 0.35 }, // C5
+            { f: 587.33, d: 0.55 }, // D5
+            { f: 440.00, d: 0.35 }, // A4
+            { f: 392.00, d: 0.75 }, // G4
+            { f: 0,      d: 0.25 },
+            // "Dù ta biết gian nan đang chờ đón..."
+            { f: 392.00, d: 0.35 }, // G4
+            { f: 440.00, d: 0.35 }, // A4
+            { f: 523.25, d: 0.55 }, // C5
+            { f: 587.33, d: 0.35 }, // D5
+            { f: 659.25, d: 0.45 }, // E5
+            { f: 783.99, d: 0.65 }, // G5
+            { f: 0,      d: 0.20 },
+            // "Và trái tim vẫn âm thầm..."
+            { f: 659.25, d: 0.35 }, // E5
+            { f: 587.33, d: 0.35 }, // D5
+            { f: 523.25, d: 0.35 }, // C5
+            { f: 493.88, d: 0.35 }, // B4
+            { f: 523.25, d: 0.85 }, // C5
+            { f: 0,      d: 0.45 }
+        ];
+
+        function ensureAudioContext() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContextClass();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
         }
-      }, 1000);
-    }
 
-    function updateHudTimer() {
-      const minutes = Math.floor(timerRemaining / 60);
-      const seconds = timerRemaining % 60;
-      const formatted = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-      const timerEl = document.getElementById('hudTimer');
-      timerEl.innerText = formatted;
+        function playMelodyStep() {
+            if (!isBGMPlaying) return;
+            ensureAudioContext();
 
-      if (timerRemaining <= 30) {
-        timerEl.classList.add('urgent');
-      } else {
-        timerEl.classList.remove('urgent');
-      }
-    }
+            const note = GLORY_MELODY[bgmNoteIndex % GLORY_MELODY.length];
+            bgmNoteIndex++;
 
-    function updateHudDisplay() {
-      document.getElementById('hudScore').innerText = scoreXP;
-      document.getElementById('hudStreak').innerText = `${currentStreak} 🔥`;
-      document.getElementById('hudProgress').innerText = `${currentQuestionIndex + 1} / ${QUESTIONS_DATA.length}`;
+            if (note.f > 0 && audioCtx) {
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const oscHarmony = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
 
-      const percent = Math.round((currentQuestionIndex / QUESTIONS_DATA.length) * 100);
-      document.getElementById('gaugePercent').innerText = `${percent}%`;
-      document.getElementById('gaugeFillBar').style.width = `${percent}%`;
-      updateHudTimer();
-    }
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(note.f, now);
 
-    // Nạp câu hỏi
-    function loadQuestion(index) {
-      const q = QUESTIONS_DATA[index];
-      document.getElementById('questionLevelTag').innerText = q.level;
-      document.getElementById('questionCounterTag').innerText = `Khoang thử thách ${index + 1} / ${QUESTIONS_DATA.length}`;
-      document.getElementById('questionText').innerText = q.question;
+                oscHarmony.type = 'sine';
+                oscHarmony.frequency.setValueAtTime(note.f * 0.5, now);
 
-      const banner = document.getElementById('feedbackBanner');
-      banner.style.display = 'none';
+                gain.gain.setValueAtTime(0.001, now);
+                gain.gain.exponentialRampToValueAtTime(0.055, now + 0.04);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + note.d * 0.95);
 
-      const optionsGrid = document.getElementById('optionsGrid');
-      optionsGrid.innerHTML = '';
-      const letters = ['A', 'B', 'C', 'D'];
+                osc.connect(gain);
+                oscHarmony.connect(gain);
+                gain.connect(audioCtx.destination);
 
-      q.options.forEach((optText, optIdx) => {
-        const btn = document.createElement('button');
-        btn.className = 'option-btn';
-        btn.dataset.index = optIdx;
-        btn.innerHTML = `
-          <div class="option-letter">${letters[optIdx]}</div>
-          <div class="option-text">${optText}</div>
-        `;
-        btn.onclick = () => handleSelectOption(optIdx);
-        optionsGrid.appendChild(btn);
-      });
+                osc.start(now);
+                oscHarmony.start(now);
+                osc.stop(now + note.d);
+                oscHarmony.stop(now + note.d);
+            }
 
-      updateHudDisplay();
-    }
-
-    // Xử lý khi học sinh bấm chọn phương án
-    function handleSelectOption(selectedIndex) {
-      const q = QUESTIONS_DATA[currentQuestionIndex];
-      const isCorrect = selectedIndex === q.correctIndex;
-
-      const buttons = document.querySelectorAll('.option-btn');
-      buttons.forEach(btn => {
-        btn.disabled = true;
-        const idx = parseInt(btn.dataset.index);
-        if (idx === q.correctIndex) {
-          btn.classList.add('correct');
-        } else if (idx === selectedIndex) {
-          btn.classList.add('wrong');
+            bgmTimer = setTimeout(playMelodyStep, note.d * 1000);
         }
-      });
 
-      userAnswersLog.push({
-        questionId: q.id,
-        questionText: q.question,
-        userIndex: selectedIndex,
-        userOptionText: q.options[selectedIndex],
-        correctIndex: q.correctIndex,
-        correctOptionText: q.options[q.correctIndex],
-        isCorrect: isCorrect,
-        explanation: q.explanation
-      });
-
-      if (isCorrect) {
-        sound.playCorrect();
-        currentStreak++;
-        if (currentStreak > maxStreak) maxStreak = currentStreak;
-        correctAnswersCount++;
-
-        const multiplier = 1 + (currentStreak - 1) * 0.2;
-        const earnedXp = Math.round(BASE_XP_PER_QUESTION * multiplier);
-        scoreXP += earnedXp;
-
-        showFeedback(true, `+${earnedXp} XP! Tuyệt vời, bạn đã thiết lập đúng điều kiện lực.`, q.explanation);
-      } else {
-        sound.playWrong();
-        currentStreak = 0;
-        showFeedback(false, `Cảnh báo! Tính toán chưa chính xác.`, q.explanation);
-      }
-
-      updateHudDisplay();
-    }
-
-    // Hiển thị khung phản hồi
-    function showFeedback(isCorrect, statusText, explanationText) {
-      const banner = document.getElementById('feedbackBanner');
-      const titleEl = document.getElementById('feedbackTitle');
-      const textEl = document.getElementById('feedbackText');
-
-      if (isCorrect) {
-        banner.style.borderLeftColor = 'var(--success)';
-        titleEl.style.color = 'var(--success)';
-        titleEl.innerHTML = `<span>✓ CHÍNH XÁC:</span> ${statusText}`;
-      } else {
-        banner.style.borderLeftColor = 'var(--danger)';
-        titleEl.style.color = 'var(--danger)';
-        titleEl.innerHTML = `<span>✕ CHƯA ĐÚNG:</span> ${statusText}`;
-      }
-
-      textEl.innerText = explanationText;
-      banner.style.display = 'block';
-    }
-
-    // Chuyển sang câu hỏi kế tiếp
-    document.getElementById('nextQuestionBtn').addEventListener('click', () => {
-      sound.playClick();
-      currentQuestionIndex++;
-      if (currentQuestionIndex < QUESTIONS_DATA.length) {
-        loadQuestion(currentQuestionIndex);
-      } else {
-        finishMission(true);
-      }
-    });
-
-    // Kết thúc bài kiểm tra & Ghi danh vào Bảng Xếp Hạng
-    function finishMission(isCompleted) {
-      clearInterval(timerInterval);
-      document.getElementById('gameHud').style.display = 'none';
-      document.getElementById('gaugeBox').style.display = 'none';
-      document.getElementById('cadetStatusBar').style.display = 'none';
-      document.getElementById('gaugeFillBar').style.width = '100%';
-
-      const timeUsed = Math.max(1, TOTAL_TIME_SECONDS - timerRemaining);
-      const recordId = `rec_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-      latestRecordId = recordId;
-
-      // Lưu kết quả học sinh vào hệ thống xếp hạng
-      const newRecord = {
-        id: recordId,
-        name: currentStudent.name,
-        className: currentStudent.className,
-        correctCount: correctAnswersCount,
-        totalQuestions: QUESTIONS_DATA.length,
-        xp: scoreXP,
-        timeUsed: timeUsed,
-        timestamp: Date.now()
-      };
-      saveStudentResultToLeaderboard(newRecord);
-
-      // Tính thứ hạng hiện tại của học sinh vừa hoàn thành
-      const sortedList = getSortedLeaderboard();
-      const rankIndex = sortedList.findIndex(item => item.id === recordId);
-      const currentRank = rankIndex !== -1 ? rankIndex + 1 : sortedList.length;
-
-      // Hiển thị thống kê cá nhân
-      document.getElementById('resultStudentIdentity').innerText =
-        `👨‍🚀 Chỉ huy: ${currentStudent.name} • Lớp/Mã: ${currentStudent.className}`;
-      document.getElementById('resCorrectCount').innerText = `${correctAnswersCount} / ${QUESTIONS_DATA.length}`;
-      document.getElementById('resTotalXp').innerText = `${scoreXP} XP`;
-      document.getElementById('resTimeUsed').innerText = formatSecondsToMMSS(timeUsed);
-      document.getElementById('resRankPosition').innerText = `#${currentRank} / ${sortedList.length}`;
-
-      const medalEl = document.getElementById('resultMedalBadge');
-      const titleEl = document.getElementById('resultTitle');
-      const subEl = document.getElementById('resultSubtitle');
-
-      if (correctAnswersCount >= 9) {
-        medalEl.innerText = '🥇';
-        titleEl.innerText = 'CHỈ HUY TRƯỞNG HUYỀN THOẠI!';
-        subEl.innerText = 'Trạm không gian cân bằng tuyệt đối! Khả năng tổng hợp và phân tích lực đạt cấp độ Đại Sư.';
-        sound.playFanfare();
-        launchConfetti();
-        updateConfetti();
-      } else if (correctAnswersCount >= 7) {
-        medalEl.innerText = '🥈';
-        titleEl.innerText = 'CHỈ HUY VECTƠ XUẤT SẮC!';
-        subEl.innerText = 'Chiến hạm đã khôi phục trạng thái ổn định vững vàng.';
-        sound.playFanfare();
-      } else {
-        medalEl.innerText = '🛡️';
-        titleEl.innerText = 'HOÀN THÀNH HUẤN LUYỆN CÂN BẰNG!';
-        subEl.innerText = 'Hãy xem lại lời giải chi tiết bên dưới để củng cố quy tắc hình bình hành nhé!';
-      }
-
-      // Đổ bảng xếp hạng & lời giải chi tiết
-      renderLeaderboardTable('resultLeaderboardBody', recordId);
-      renderReviewSummary();
-
-      // Đóng sẵn mục lời giải chi tiết khi mới vào màn hình kết quả
-      document.getElementById('reviewContainer').style.display = 'none';
-      document.getElementById('toggleReviewBtn').innerText = '📝 XEM LỜI GIẢI CHI TIẾT';
-
-      showPanel('resultScreen');
-    }
-
-    // Đổ dữ liệu bảng giải thích chi tiết
-    function renderReviewSummary() {
-      const container = document.getElementById('reviewContainer');
-      container.innerHTML = '';
-      userAnswersLog.forEach((log, i) => {
-        const item = document.createElement('div');
-        item.className = `review-item ${log.isCorrect ? 'pass' : 'fail'}`;
-        item.innerHTML = `
-          <div style="font-weight: 700; margin-bottom: 4px; color: #ffffff;">
-            Câu ${i + 1}: ${log.questionText}
-          </div>
-          <div style="font-size: 14px; margin-bottom: 4px;">
-            Lựa chọn của bạn: <strong style="color: ${log.isCorrect ? 'var(--success)' : 'var(--danger)'}">${log.userOptionText}</strong>
-          </div>
-          ${!log.isCorrect ? `<div style="font-size: 14px; color: var(--success); margin-bottom: 4px;">Đáp án chuẩn: <strong>${log.correctOptionText}</strong></div>` : ''}
-          <div style="font-size: 13px; color: #a4b3d6; font-style: italic;">
-            💡 Lời giải: ${log.explanation}
-          </div>
-        `;
-        container.appendChild(item);
-      });
-    }
-
-    /* ----------------------------------------------------
-       7. SỰ KIỆN GIAO DIỆN & TIỆN ÍCH
-       ---------------------------------------------------- */
-    // Bắt đầu từ màn hình chính
-    document.getElementById('startMissionBtn').addEventListener('click', () => {
-      validateAndStartMission(false);
-    });
-
-    // Cho phép nhấn phím Enter trong ô nhập tên/lớp để bắt đầu ngay
-    ['studentNameInput', 'studentClassInput'].forEach(inputId => {
-      const el = document.getElementById(inputId);
-      el.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          validateAndStartMission(false);
+        function startBGM() {
+            if (isBGMPlaying) return;
+            try {
+                ensureAudioContext();
+                isBGMPlaying = true;
+                updateBGMButtonUI();
+                playMelodyStep();
+            } catch (e) {
+                console.warn("Trình duyệt đang chờ tương tác để phát nhạc:", e);
+            }
         }
-      });
-      el.addEventListener('input', () => {
-        if (el.value.trim()) {
-          document.getElementById('studentNameInput').classList.remove('input-error');
-          document.getElementById('studentFormError').style.display = 'none';
+
+        function stopBGM() {
+            isBGMPlaying = false;
+            if (bgmTimer) {
+                clearTimeout(bgmTimer);
+                bgmTimer = null;
+            }
+            updateBGMButtonUI();
         }
-      });
-    });
 
-    // Chơi lại với cùng tên học sinh
-    document.getElementById('replayMissionBtn').addEventListener('click', () => {
-      validateAndStartMission(true);
-    });
+        function toggleBGM() {
+            if (isBGMPlaying) {
+                stopBGM();
+            } else {
+                startBGM();
+            }
+        }
 
-    // Đổi sang lượt học sinh mới
-    document.getElementById('switchStudentBtn').addEventListener('click', () => {
-      sound.playClick();
-      document.getElementById('studentNameInput').value = '';
-      document.getElementById('studentFormError').style.display = 'none';
-      showPanel('splashScreen');
-      setTimeout(() => document.getElementById('studentNameInput').focus(), 100);
-    });
+        function updateBGMButtonUI() {
+            const btn = document.getElementById('bgm-toggle-btn');
+            const text = document.getElementById('bgm-status-text');
+            const eq = document.getElementById('eq-bars');
+            if (!btn || !text || !eq) return;
 
-    // Ẩn / Hiện Xem lại lời giải chi tiết
-    document.getElementById('toggleReviewBtn').addEventListener('click', () => {
-      sound.playClick();
-      const reviewBox = document.getElementById('reviewContainer');
-      if (reviewBox.style.display === 'block') {
-        reviewBox.style.display = 'none';
-        document.getElementById('toggleReviewBtn').innerText = '📝 XEM LỜI GIẢI CHI TIẾT';
-      } else {
-        reviewBox.style.display = 'block';
-        document.getElementById('toggleReviewBtn').innerText = '▲ THU GỌN LỜI GIẢI';
-      }
-    });
+            if (isBGMPlaying) {
+                text.textContent = "Nhạc: Đỉnh Vinh Quang (Bật)";
+                btn.classList.remove('opacity-70');
+                eq.classList.remove('opacity-30');
+            } else {
+                text.textContent = "Nhạc: Đang tắt";
+                btn.classList.add('opacity-70');
+                eq.classList.add('opacity-30');
+            }
+        }
 
-    // Mở / Đóng Modal Bảng Xếp Hạng từ Header
-    const leaderboardModal = document.getElementById('leaderboardModal');
-    document.getElementById('openLeaderboardBtn').addEventListener('click', () => {
-      sound.playClick();
-      renderLeaderboardTable('modalLeaderboardBody', latestRecordId);
-      leaderboardModal.classList.add('open');
-    });
+        // Hiệu ứng âm thanh "Ting-ting!" khi trả lời đúng
+        function playCorrectSound() {
+            try {
+                ensureAudioContext();
+                const now = audioCtx.currentTime;
+                const notes = [1046.50, 1318.51]; // C6 -> E6
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    const startTime = now + idx * 0.13;
+                    osc.frequency.setValueAtTime(freq, startTime);
 
-    document.getElementById('closeLeaderboardModalBtn').addEventListener('click', () => {
-      sound.playClick();
-      leaderboardModal.classList.remove('open');
-    });
+                    gain.gain.setValueAtTime(0.001, startTime);
+                    gain.gain.exponentialRampToValueAtTime(0.24, startTime + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.45);
 
-    leaderboardModal.addEventListener('click', (e) => {
-      if (e.target === leaderboardModal) {
-        leaderboardModal.classList.remove('open');
-      }
-    });
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(startTime);
+                    osc.stop(startTime + 0.46);
+                });
+            } catch (e) {
+                console.warn(e);
+            }
+        }
 
-    // Nút sao chép & xóa dữ liệu bảng xếp hạng
-    document.getElementById('copyResultCsvBtn').addEventListener('click', copyLeaderboardToClipboard);
-    document.getElementById('copyModalCsvBtn').addEventListener('click', copyLeaderboardToClipboard);
-    setupClearLeaderboardButton('clearResultRankBtn');
-    setupClearLeaderboardButton('clearModalRankBtn');
+        // Hiệu ứng âm thanh "Ùuuuuuu!" khi trả lời sai
+        function playWrongSound() {
+            try {
+                ensureAudioContext();
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
 
-    // Bật / Tắt âm thanh
-    document.getElementById('audioToggleBtn').addEventListener('click', () => {
-      sound.enabled = !sound.enabled;
-      document.getElementById('audioIcon').innerText = sound.enabled ? '🔊' : '🔇';
-      sound.playClick();
-    });
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(210, now);
+                osc.frequency.linearRampToValueAtTime(115, now + 0.65);
 
-    // Toàn màn hình
-    document.getElementById('fullscreenBtn').addEventListener('click', () => {
-      sound.playClick();
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(err => {
-          console.warn(`Không thể bật toàn màn hình: ${err.message}`);
+                // Lọc tần số thấp để tiếng "ùuuuuu" trầm ấm, không chói tai
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(380, now);
+
+                gain.gain.setValueAtTime(0.001, now);
+                gain.gain.exponentialRampToValueAtTime(0.22, now + 0.06);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.72);
+
+                osc.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.75);
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+
+        // Nhạc chúc mừng chiến thắng khi lên đỉnh
+        function playVictoryFanfare() {
+            try {
+                ensureAudioContext();
+                const now = audioCtx.currentTime;
+                const fanfare = [523.25, 659.25, 783.99, 1046.50]; // C5 E5 G5 C6
+                fanfare.forEach((freq, i) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    const t = now + i * 0.14;
+                    osc.frequency.setValueAtTime(freq, t);
+                    gain.gain.setValueAtTime(0.001, t);
+                    gain.gain.exponentialRampToValueAtTime(0.22, t + 0.03);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.55);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(t);
+                    osc.stop(t + 0.56);
+                });
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+
+        /* =========================================================================
+           4. LOGIC HÀNH TRÌNH LEO NÚI & HIỂN THỊ CÂU HỎI
+           ========================================================================= */
+        function shuffleArray(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        function escapeHTML(str) {
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Xóa bỏ tiền tố tên câu hỏi (ví dụ: "Câu 1:", "Câu 13.", "Bài 2:") để chỉ giữ lại phần đề
+        function stripQuestionPrefix(text) {
+            return String(text || "").replace(/^\s*(?:Câu|Bài)\s*\d+\s*[:.)\-]\s*/i, "").trim();
+        }
+
+        function startNewJourney() {
+            if (state.selectionMode === 'manual' && state.selectedQuestionIndices.length > 0) {
+                state.activeQuestions = state.selectedQuestionIndices
+                    .map(idx => state.questionBank[idx])
+                    .filter(Boolean);
+            } else {
+                const count = Math.min(state.desiredSteps, state.questionBank.length);
+                state.activeQuestions = shuffleArray(state.questionBank).slice(0, count);
+            }
+
+            state.currentStepIndex = 0;
+            state.score = 0;
+            state.attemptsOnCurrent = 0;
+            state.isTransitioning = false;
+            state.quizStartTime = Date.now();
+            state.lastDurationSeconds = 0;
+
+            // Cập nhật tiêu đề chủ đề
+            const topicLabel = document.querySelector('#active-topic-label span:last-child');
+            if (topicLabel) {
+                topicLabel.textContent = `Chủ đề: ${state.topicName}`;
+            }
+
+            updateScoreUI();
+            buildMountainSteps();
+            moveClimberToBase();
+            renderCurrentQuestion();
+            setFeedbackBanner("💡", "Chọn một đáp án đúng để bước tiếp lên đỉnh núi Physic!", "neutral");
+
+            // Đồng bộ trạng thái bắt đầu lên bảng xếp hạng nếu học sinh đã nhập tên
+            if (state.studentName && !state.isTeacherRole) {
+                pushStudentStatusToCloud(false);
+            }
+        }
+
+        function moveClimberToBase() {
+            const climber = document.getElementById('climber-group');
+            if (climber) {
+                climber.setAttribute('transform', 'translate(85, 415)');
+            }
+        }
+
+        function moveClimberToStep(stepIdx) {
+            const climber = document.getElementById('climber-group');
+            const pt = state.stepCoordinates[stepIdx];
+            if (climber && pt) {
+                climber.setAttribute('transform', `translate(${pt.x}, ${pt.y - 12})`);
+            }
+        }
+
+        function buildMountainSteps() {
+            const stepsLayer = document.getElementById('steps-layer');
+            const pathLine = document.getElementById('climb-path-line');
+            if (!stepsLayer || !pathLine) return;
+
+            stepsLayer.innerHTML = '';
+            state.stepCoordinates = [];
+
+            const total = state.activeQuestions.length;
+            if (total === 0) return;
+
+            const baseX = 85;
+            const baseY = 415;
+            const summitX = 210;
+            const summitY = 78;
+
+            let pathD = `M ${baseX} ${baseY}`;
+
+            for (let i = 0; i < total; i++) {
+                const ratio = (i + 1) / total;
+                const y = Math.round(baseY - 22 - ratio * (baseY - 22 - summitY));
+                let x;
+                if (i === total - 1) {
+                    x = summitX;
+                } else {
+                    const swing = (1 - ratio * 0.78) * 68;
+                    x = Math.round(summitX + (i % 2 === 0 ? -swing : swing));
+                }
+
+                state.stepCoordinates.push({ x, y });
+                pathD += ` L ${x} ${y}`;
+
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                g.setAttribute('transform', `translate(${x}, ${y})`);
+
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('id', `step-node-${i}`);
+                circle.setAttribute('r', i === total - 1 ? '15' : '12.5');
+                circle.setAttribute('fill', '#ffffff');
+                circle.setAttribute('stroke', '#0284c7');
+                circle.setAttribute('stroke-width', '3');
+
+                const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                label.setAttribute('id', `step-text-${i}`);
+                label.setAttribute('y', '4');
+                label.setAttribute('text-anchor', 'middle');
+                label.setAttribute('font-size', '11');
+                label.setAttribute('font-weight', '700');
+                label.setAttribute('fill', '#0369a1');
+                label.textContent = i === total - 1 ? '★' : `${i + 1}`;
+
+                g.appendChild(circle);
+                g.appendChild(label);
+                stepsLayer.appendChild(g);
+            }
+
+            pathLine.setAttribute('d', pathD);
+            updateMountainStepColors();
+        }
+
+        function updateMountainStepColors() {
+            const total = state.activeQuestions.length;
+            for (let i = 0; i < total; i++) {
+                const circle = document.getElementById(`step-node-${i}`);
+                const label = document.getElementById(`step-text-${i}`);
+                if (!circle || !label) continue;
+
+                if (i < state.currentStepIndex) {
+                    // Bậc đã vượt qua -> Xanh lá
+                    circle.setAttribute('fill', '#10b981');
+                    circle.setAttribute('stroke', '#ffffff');
+                    label.setAttribute('fill', '#ffffff');
+                } else if (i === state.currentStepIndex) {
+                    // Bậc đang chinh phục -> Vàng cam nổi bật
+                    circle.setAttribute('fill', '#f59e0b');
+                    circle.setAttribute('stroke', '#fef08a');
+                    label.setAttribute('fill', '#ffffff');
+                } else {
+                    // Bậc phía trước -> Trắng viền xanh
+                    circle.setAttribute('fill', '#ffffff');
+                    circle.setAttribute('stroke', '#0284c7');
+                    label.setAttribute('fill', '#0369a1');
+                }
+            }
+        }
+
+        function restartCurrentQuiz() {
+            closeVictoryModal();
+            startNewJourney();
+            showToast("Đã làm mới lượt leo núi với bộ câu hỏi mới!", "info");
+        }
+
+        function renderCurrentQuestion() {
+            const total = state.activeQuestions.length;
+            const currentQ = state.activeQuestions[state.currentStepIndex];
+            if (!currentQ) return;
+
+            document.getElementById('step-progress-text').textContent = `Bậc ${state.currentStepIndex + 1} / ${total}`;
+            document.getElementById('question-badge').textContent = `CÂU HỎI ${state.currentStepIndex + 1} / ${total}`;
+            document.getElementById('question-category-tag').textContent = currentQ.topic || state.topicName;
+            document.getElementById('question-text').textContent = stripQuestionPrefix(currentQ.question);
+
+            const optionsGrid = document.getElementById('options-grid');
+            optionsGrid.innerHTML = '';
+
+            const letters = ['A', 'B', 'C', 'D'];
+            currentQ.options.forEach((optText, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = "option-btn w-full text-left p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-sky-400 hover:bg-sky-50/70 transition-all duration-200 flex items-center gap-3.5 shadow-sm active:scale-[0.99]";
+                btn.innerHTML = `
+                    <span class="option-letter w-9 h-9 rounded-xl bg-sky-100 text-sky-800 font-bold flex items-center justify-center shrink-0 text-sm sm:text-base transition-colors">
+                        ${letters[idx]}
+                    </span>
+                    <span class="text-sm sm:text-base font-semibold text-slate-700 leading-snug flex-1">
+                        ${escapeHTML(optText)}
+                    </span>
+                `;
+                btn.addEventListener('click', () => handleAnswerSelect(idx, btn));
+                optionsGrid.appendChild(btn);
+            });
+
+            updateMountainStepColors();
+        }
+
+        function handleAnswerSelect(selectedIndex, btnEl) {
+            if (state.isTransitioning) return;
+
+            // Tự kích hoạt nhạc nền nếu trình duyệt chặn autoplay ban đầu
+            if (!isBGMPlaying && !audioCtx) {
+                startBGM();
+            }
+
+            const currentQ = state.activeQuestions[state.currentStepIndex];
+            const isCorrect = selectedIndex === currentQ.answer;
+
+            if (isCorrect) {
+                state.isTransitioning = true;
+
+                // Hiệu ứng đổi màu xanh lá cây & kêu ting-ting
+                btnEl.classList.remove('border-slate-200', 'bg-white', 'hover:border-sky-400', 'hover:bg-sky-50/70');
+                btnEl.classList.add('border-emerald-600', 'bg-emerald-500', 'text-white', 'shadow-lg', 'shadow-emerald-200', 'animate-pop');
+                const letterSpan = btnEl.querySelector('.option-letter');
+                if (letterSpan) {
+                    letterSpan.classList.remove('bg-sky-100', 'text-sky-800');
+                    letterSpan.classList.add('bg-white', 'text-emerald-700');
+                }
+                const textSpan = btnEl.querySelector('span:last-child');
+                if (textSpan) {
+                    textSpan.classList.remove('text-slate-700');
+                    textSpan.classList.add('text-white');
+                }
+
+                playCorrectSound();
+
+                // Cộng điểm (100 điểm nếu trả lời đúng ngay lần đầu, 50 điểm nếu thử lại)
+                const earned = state.attemptsOnCurrent === 0 ? 100 : 50;
+                state.score += earned;
+                updateScoreUI();
+
+                // Cho nhân vật leo lên bậc thang vừa trả lời đúng
+                moveClimberToStep(state.currentStepIndex);
+                setFeedbackBanner("🎉", `Chính xác! Ting-ting! Bạn nhận +${earned} điểm và tiến lên bậc ${state.currentStepIndex + 1}!`, "success");
+                launchConfetti(45);
+
+                const nextStep = state.currentStepIndex + 1;
+                const finishedNow = nextStep >= state.activeQuestions.length;
+                if (finishedNow) {
+                    state.lastDurationSeconds = Math.max(1, Math.round((Date.now() - state.quizStartTime) / 1000));
+                }
+
+                // Cập nhật tiến độ lên bảng xếp hạng lớp theo thời gian thực
+                if (state.studentName && !state.isTeacherRole) {
+                    pushStudentStatusToCloud(finishedNow, nextStep);
+                }
+
+                // Chuyển sang câu hỏi tiếp theo hoặc mở màn hình chiến thắng
+                setTimeout(() => {
+                    state.currentStepIndex++;
+                    state.attemptsOnCurrent = 0;
+
+                    if (state.currentStepIndex >= state.activeQuestions.length) {
+                        updateMountainStepColors();
+                        triggerVictory();
+                    } else {
+                        state.isTransitioning = false;
+                        renderCurrentQuestion();
+                        setFeedbackBanner("🚀", `Tuyệt vời! Hãy chinh phục tiếp câu hỏi số ${state.currentStepIndex + 1}!`, "neutral");
+                    }
+                }, 1150);
+            } else {
+                // Trả lời sai -> đổi màu đỏ, rung nhẹ & kêu ùuuuuu
+                state.attemptsOnCurrent++;
+                btnEl.classList.remove('border-slate-200', 'bg-white', 'hover:border-sky-400', 'hover:bg-sky-50/70');
+                btnEl.classList.add('border-rose-600', 'bg-rose-500', 'text-white', 'animate-shake');
+                btnEl.disabled = true;
+
+                const letterSpan = btnEl.querySelector('.option-letter');
+                if (letterSpan) {
+                    letterSpan.classList.remove('bg-sky-100', 'text-sky-800');
+                    letterSpan.classList.add('bg-white', 'text-rose-600');
+                }
+                const textSpan = btnEl.querySelector('span:last-child');
+                if (textSpan) {
+                    textSpan.classList.remove('text-slate-700');
+                    textSpan.classList.add('text-white');
+                }
+
+                playWrongSound();
+                setFeedbackBanner("😅", "Ùuuuuuu! Chưa chính xác rồi, hãy suy nghĩ và chọn lại đáp án khác nhé!", "error");
+            }
+        }
+
+        function setFeedbackBanner(icon, message, type) {
+            const banner = document.getElementById('feedback-banner');
+            const iconEl = document.getElementById('feedback-icon');
+            const msgEl = document.getElementById('feedback-message');
+            if (!banner || !iconEl || !msgEl) return;
+
+            iconEl.textContent = icon;
+            msgEl.textContent = message;
+
+            banner.className = "mt-6 min-h-[56px] rounded-2xl px-4 py-3 flex items-center justify-between gap-3 border transition-all ";
+            if (type === "success") {
+                banner.className += "bg-emerald-50 border-emerald-300 text-emerald-800";
+                msgEl.className = "text-sm sm:text-base font-bold text-emerald-800";
+            } else if (type === "error") {
+                banner.className += "bg-rose-50 border-rose-300 text-rose-800";
+                msgEl.className = "text-sm sm:text-base font-bold text-rose-800";
+            } else {
+                banner.className += "bg-slate-50 border-slate-200/80 text-slate-600";
+                msgEl.className = "text-sm sm:text-base font-medium text-slate-600";
+            }
+        }
+
+        function updateScoreUI() {
+            const scoreEl = document.getElementById('score-text');
+            if (scoreEl) {
+                scoreEl.textContent = `${state.score} điểm`;
+            }
+        }
+
+        function triggerVictory() {
+            playVictoryFanfare();
+            launchConfetti(140);
+            const totalTime = state.lastDurationSeconds || Math.max(1, Math.round((Date.now() - state.quizStartTime) / 1000));
+            document.getElementById('final-score-text').textContent = `${state.score} điểm`;
+            document.getElementById('final-steps-text').textContent = `${state.activeQuestions.length} / ${state.activeQuestions.length} bậc`;
+            document.getElementById('final-time-text').textContent = `${totalTime} giây`;
+
+            const greetingEl = document.getElementById('victory-student-greeting');
+            if (greetingEl) {
+                const nameDisplay = state.studentName ? `${state.studentName}${state.studentClass ? ` (${state.studentClass})` : ''}` : 'Bạn';
+                greetingEl.textContent = `Chúc mừng ${nameDisplay} đã xuất sắc chạm tay tới Đỉnh Vinh Quang!`;
+            }
+
+            renderLeaderboardLists();
+            const modal = document.getElementById('victory-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeVictoryModal() {
+            const modal = document.getElementById('victory-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        /* =========================================================================
+           5. BẢNG ĐIỀU KHIỂN GIÁO VIÊN & ĐỌC FILE ĐỀ (.PDF, .TXT, .CSV, .JSON)
+           ========================================================================= */
+        function openTeacherModal() {
+            document.getElementById('topic-input').value = state.topicName;
+            document.getElementById('step-count-input').value = state.desiredSteps;
+            document.getElementById('step-count-input').max = state.questionBank.length;
+            updateBankStatusBadge();
+            renderBankQuestionChecklist();
+            setSelectionMode(state.selectionMode);
+            const modal = document.getElementById('teacher-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeTeacherModal() {
+            const modal = document.getElementById('teacher-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function setStepCountPreset(count) {
+            const input = document.getElementById('step-count-input');
+            if (input) {
+                input.value = Math.min(count, state.questionBank.length);
+            }
+        }
+
+        function updateBankStatusBadge() {
+            const badge = document.getElementById('bank-status-badge');
+            if (badge) {
+                badge.textContent = `📚 Kho đề hiện tại: ${state.questionBank.length} câu hỏi`;
+            }
+        }
+
+        function setSelectionMode(mode) {
+            state.selectionMode = mode;
+            const randomBtn = document.getElementById('mode-random-btn');
+            const manualBtn = document.getElementById('mode-manual-btn');
+            const randomPanel = document.getElementById('random-mode-panel');
+            const manualPanel = document.getElementById('manual-mode-panel');
+
+            if (mode === 'manual') {
+                manualBtn.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500 text-white shadow-sm transition-all";
+                randomBtn.className = "px-2.5 py-1 rounded-lg text-xs font-bold text-amber-900 hover:bg-amber-200/70 transition-all";
+                randomPanel.classList.add('hidden');
+                manualPanel.classList.remove('hidden');
+            } else {
+                randomBtn.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500 text-white shadow-sm transition-all";
+                manualBtn.className = "px-2.5 py-1 rounded-lg text-xs font-bold text-amber-900 hover:bg-amber-200/70 transition-all";
+                manualPanel.classList.add('hidden');
+                randomPanel.classList.remove('hidden');
+            }
+        }
+
+        function renderBankQuestionChecklist() {
+            const container = document.getElementById('bank-question-checklist');
+            if (!container) return;
+            container.innerHTML = '';
+
+            state.selectedQuestionIndices = state.selectedQuestionIndices.filter(
+                idx => idx >= 0 && idx < state.questionBank.length
+            );
+
+            state.questionBank.forEach((item, idx) => {
+                const isChecked = state.selectedQuestionIndices.includes(idx);
+                const row = document.createElement('label');
+                row.className = `flex items-start gap-2.5 p-2 rounded-lg cursor-pointer transition-colors ${isChecked ? 'bg-sky-50/90' : 'hover:bg-slate-50'}`;
+
+                const ansLetter = ['A', 'B', 'C', 'D'][item.answer] || '';
+                row.innerHTML = `
+                    <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleQuestionCheckbox(${idx}, this.checked)" class="mt-1 w-4 h-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500 shrink-0">
+                    <div class="text-xs leading-snug flex-1">
+                        <p class="font-semibold text-slate-800">${idx + 1}. ${escapeHTML(stripQuestionPrefix(item.question))}</p>
+                        <p class="text-[11px] text-emerald-700 font-medium mt-0.5">Đáp án đúng: ${ansLetter}. ${escapeHTML(item.options[item.answer] || '')}</p>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+
+            updateManualSelectedCounter();
+        }
+
+        function toggleQuestionCheckbox(index, checked) {
+            if (checked) {
+                if (!state.selectedQuestionIndices.includes(index)) {
+                    state.selectedQuestionIndices.push(index);
+                }
+            } else {
+                state.selectedQuestionIndices = state.selectedQuestionIndices.filter(i => i !== index);
+            }
+            updateManualSelectedCounter();
+        }
+
+        function selectAllBankQuestions() {
+            state.selectedQuestionIndices = state.questionBank.map((_, idx) => idx);
+            renderBankQuestionChecklist();
+        }
+
+        function clearAllBankQuestions() {
+            state.selectedQuestionIndices = [];
+            renderBankQuestionChecklist();
+        }
+
+        function updateManualSelectedCounter() {
+            const counterEl = document.getElementById('manual-selected-counter');
+            if (counterEl) {
+                counterEl.textContent = `Đã chọn: ${state.selectedQuestionIndices.length} / ${state.questionBank.length} câu hỏi`;
+            }
+        }
+
+        function resetToDefaultBank() {
+            state.questionBank = [...DEFAULT_PHYSICS_QUESTIONS];
+            state.topicName = "Giao thoa sóng (Vật Lí 11)";
+            state.selectedQuestionIndices = [];
+            document.getElementById('topic-input').value = state.topicName;
+            document.getElementById('step-count-input').max = state.questionBank.length;
+            if (parseInt(document.getElementById('step-count-input').value, 10) > state.questionBank.length) {
+                document.getElementById('step-count-input').value = 7;
+            }
+            updateBankStatusBadge();
+            renderBankQuestionChecklist();
+            showToast("Đã khôi phục bộ đề Giao thoa sóng (21 câu hỏi).", "info");
+        }
+
+        async function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const fileName = file.name;
+            const ext = fileName.split('.').pop().toLowerCase();
+
+            try {
+                let parsed = [];
+                if (ext === 'pdf') {
+                    showToast("Đang trích xuất câu hỏi từ file PDF...", "info");
+                    parsed = await parsePDFFile(file);
+                } else {
+                    const text = await file.text();
+                    if (ext === 'json') {
+                        parsed = parseJSONQuestions(text);
+                    } else if (ext === 'csv') {
+                        parsed = parseCSVQuestions(text);
+                    } else {
+                        parsed = parseTextQuestions(text);
+                    }
+                }
+
+                if (!parsed || parsed.length === 0) {
+                    showToast("Không tìm thấy câu hỏi trắc nghiệm 4 đáp án hợp lệ trong file!", "error");
+                    return;
+                }
+
+                applyUploadedQuestions(parsed, fileName);
+            } catch (err) {
+                console.error("Lỗi đọc file:", err);
+                showToast("Không thể đọc file này. Vui lòng kiểm tra lại định dạng!", "error");
+            } finally {
+                event.target.value = "";
+            }
+        }
+
+        function applyUploadedQuestions(parsedQuestions, rawFileName) {
+            state.questionBank = parsedQuestions;
+            state.selectedQuestionIndices = [];
+            const cleanTitle = rawFileName.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " ");
+            document.getElementById('topic-input').value = cleanTitle;
+
+            const stepInput = document.getElementById('step-count-input');
+            stepInput.max = parsedQuestions.length;
+            if (parseInt(stepInput.value, 10) > parsedQuestions.length) {
+                stepInput.value = parsedQuestions.length;
+            }
+
+            updateBankStatusBadge();
+            renderBankQuestionChecklist();
+            showToast(`Tải lên thành công ${parsedQuestions.length} câu hỏi từ "${rawFileName}"!`, "success");
+        }
+
+        // Trích xuất văn bản từ file PDF bằng PDF.js
+        async function parsePDFFile(file) {
+            if (!window.pdfjsLib) {
+                throw new Error("Thư viện PDF.js chưa sẵn sàng.");
+            }
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            let fullText = "";
+
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const page = await pdf.getPage(pageNum);
+                const textContent = await page.getTextContent();
+                let lastY = null;
+                let pageLines = [];
+                let currentLine = "";
+
+                for (const item of textContent.items) {
+                    const y = item.transform ? item.transform[5] : null;
+                    if (lastY !== null && y !== null && Math.abs(y - lastY) > 5) {
+                        pageLines.push(currentLine.trim());
+                        currentLine = item.str;
+                    } else {
+                        currentLine += (currentLine ? " " : "") + item.str;
+                    }
+                    lastY = y;
+                }
+                if (currentLine.trim()) {
+                    pageLines.push(currentLine.trim());
+                }
+                fullText += pageLines.join("\n") + "\n";
+            }
+
+            return parseTextQuestions(fullText);
+        }
+
+        // Phân tích văn bản đề thi trắc nghiệm (TXT hoặc nội dung trích xuất từ PDF)
+        function parseTextQuestions(rawText) {
+            const text = rawText.replace(/\r/g, "");
+            const questions = [];
+
+            // Tìm bảng đáp án ở cuối đề (nếu có dạng: 1. A  2. B  3. C... hoặc Câu 1: B)
+            const answerKeyMap = {};
+            const keySectionMatch = text.match(/(?:BẢNG ĐÁP ÁN|ĐÁP ÁN THAM KHẢO|ĐÁP ÁN)([\s\S]*)$/i);
+            if (keySectionMatch) {
+                const keyBlock = keySectionMatch[1];
+                const keyPairs = keyBlock.matchAll(/(?:Câu\s*)?(\d+)\s*[:.\-)\s]+\s*([A-D])\b/gi);
+                for (const m of keyPairs) {
+                    const qNum = parseInt(m[1], 10);
+                    const letter = m[2].toUpperCase();
+                    answerKeyMap[qNum] = ['A', 'B', 'C', 'D'].indexOf(letter);
+                }
+            }
+
+            // Tách từng khối câu hỏi bắt đầu bằng "Câu X" hoặc "Bài X" hoặc "1."
+            const blocks = text.split(/(?=(?:^|\n)\s*(?:Câu|Bài)\s+\d+\s*[:.])/i);
+
+            blocks.forEach((block, idx) => {
+                const trimmed = block.trim();
+                if (!trimmed) return;
+
+                const qNumMatch = trimmed.match(/^(?:Câu|Bài)\s+(\d+)/i);
+                const qNum = qNumMatch ? parseInt(qNumMatch[1], 10) : idx + 1;
+
+                // Tách đáp án đặt ngay dưới câu hỏi (nếu có)
+                let inlineAnswerIdx = -1;
+                const inlineAnsMatch = trimmed.match(/(?:Đáp án|ĐA|Chọn)\s*[:\-]?\s*([A-D])\b/i);
+                if (inlineAnsMatch) {
+                    inlineAnswerIdx = ['A', 'B', 'C', 'D'].indexOf(inlineAnsMatch[1].toUpperCase());
+                }
+
+                // Làm sạch phần ghi chú đáp án khỏi nội dung câu hỏi
+                const cleanBlock = trimmed.replace(/(?:Đáp án|ĐA|Chọn)\s*[:\-]?\s*[A-D]\b.*$/im, "").trim();
+
+                // Tìm vị trí A., B., C., D.
+                const optAMatch = cleanBlock.match(/(?:^|\s|\n)A\s*[.)]\s*/);
+                const optBMatch = cleanBlock.match(/(?:^|\s|\n)B\s*[.)]\s*/);
+                const optCMatch = cleanBlock.match(/(?:^|\s|\n)C\s*[.)]\s*/);
+                const optDMatch = cleanBlock.match(/(?:^|\s|\n)D\s*[.)]\s*/);
+
+                if (optAMatch && optBMatch && optCMatch && optDMatch) {
+                    const idxA = optAMatch.index;
+                    const idxB = optBMatch.index;
+                    const idxC = optCMatch.index;
+                    const idxD = optDMatch.index;
+
+                    if (idxA < idxB && idxB < idxC && idxC < idxD) {
+                        const questionStem = stripQuestionPrefix(cleanBlock.slice(0, idxA).replace(/\s+/g, " ").trim());
+                        const optA = cleanBlock.slice(idxA + optAMatch[0].length, idxB).replace(/\s+/g, " ").trim();
+                        const optB = cleanBlock.slice(idxB + optBMatch[0].length, idxC).replace(/\s+/g, " ").trim();
+                        const optC = cleanBlock.slice(idxC + optCMatch[0].length, idxD).replace(/\s+/g, " ").trim();
+                        const optD = cleanBlock.slice(idxD + optDMatch[0].length).replace(/\s+/g, " ").trim();
+
+                        let ans = inlineAnswerIdx !== -1 ? inlineAnswerIdx : (answerKeyMap[qNum] !== undefined ? answerKeyMap[qNum] : 0);
+
+                        if (questionStem && optA && optB && optC && optD) {
+                            questions.push({
+                                question: questionStem,
+                                options: [optA, optB, optC, optD],
+                                answer: ans,
+                                topic: "Đề tải lên"
+                            });
+                        }
+                    }
+                }
+            });
+
+            return questions;
+        }
+
+        function parseCSVQuestions(text) {
+            const lines = text.split(/\r?\n/).filter(l => l.trim());
+            const questions = [];
+            for (let i = 0; i < lines.length; i++) {
+                // Bỏ qua dòng tiêu đề nếu có
+                if (i === 0 && /câu hỏi|question/i.test(lines[i])) continue;
+                const cols = lines[i].split(/[,;]/).map(c => c.replace(/^"|"$/g, '').trim());
+                if (cols.length >= 6) {
+                    const ansLetter = cols[5].toUpperCase();
+                    const ansIdx = ['A', 'B', 'C', 'D'].indexOf(ansLetter);
+                    questions.push({
+                        question: stripQuestionPrefix(cols[0]),
+                        options: [cols[1], cols[2], cols[3], cols[4]],
+                        answer: ansIdx !== -1 ? ansIdx : 0,
+                        topic: cols[6] || "Đề CSV"
+                    });
+                }
+            }
+            return questions;
+        }
+
+        function parseJSONQuestions(text) {
+            const data = JSON.parse(text);
+            if (!Array.isArray(data)) return [];
+            return data.filter(item => item.question && Array.isArray(item.options) && item.options.length === 4)
+                .map(item => ({
+                    question: stripQuestionPrefix(item.question),
+                    options: item.options.map(String),
+                    answer: typeof item.answer === 'number' ? item.answer : Math.max(0, ['A', 'B', 'C', 'D'].indexOf(String(item.answer).toUpperCase())),
+                    topic: item.topic || "Đề JSON"
+                }));
+        }
+
+        function applyTeacherSettings() {
+            const newTopic = document.getElementById('topic-input').value.trim();
+
+            if (state.selectionMode === 'manual') {
+                if (state.selectedQuestionIndices.length === 0) {
+                    showToast("Thầy/cô vui lòng tích chọn ít nhất 1 câu hỏi trong danh sách!", "error");
+                    return;
+                }
+                if (newTopic) {
+                    state.topicName = newTopic;
+                }
+                state.desiredSteps = state.selectedQuestionIndices.length;
+                state.sessionId = `session_${Date.now()}`;
+
+                closeTeacherModal();
+                closeVictoryModal();
+                startNewJourney();
+                broadcastTeacherSessionToClass();
+                showToast(`Đã phát ${state.desiredSteps} câu hỏi đã chọn cho cả lớp!`, "success");
+                return;
+            }
+
+            let requestedSteps = parseInt(document.getElementById('step-count-input').value, 10);
+
+            if (isNaN(requestedSteps) || requestedSteps < 1) {
+                showToast("Vui lòng nhập số bậc leo núi hợp lệ (ít nhất 1 câu)!", "error");
+                return;
+            }
+
+            if (requestedSteps > state.questionBank.length) {
+                requestedSteps = state.questionBank.length;
+                showToast(`Kho đề hiện có ${state.questionBank.length} câu nên số bậc được đặt tối đa là ${requestedSteps}.`, "info");
+            }
+
+            if (newTopic) {
+                state.topicName = newTopic;
+            }
+            state.desiredSteps = requestedSteps;
+            state.sessionId = `session_${Date.now()}`;
+
+            closeTeacherModal();
+            closeVictoryModal();
+            startNewJourney();
+            broadcastTeacherSessionToClass();
+            showToast(`Đã phát bộ đề ${state.desiredSteps} bậc leo núi cho cả lớp!`, "success");
+        }
+
+        function downloadSampleTXT() {
+            const sampleContent = `Câu 1: Đơn vị của lực trong hệ đo lường quốc tế SI là gì?
+A. Jun (J)
+B. Niutơn (N)
+C. Oát (W)
+D. Paxcan (Pa)
+Đáp án: B
+
+Câu 2: Hợp lực của hai lực đồng quy có độ lớn F1 = 6 N và F2 = 8 N vuông góc với nhau là bao nhiêu?
+A. 14 N
+B. 2 N
+C. 10 N
+D. 48 N
+Đáp án: C
+`;
+            triggerDownload(sampleContent, "De_Mau_Vat_Li.txt", "text/plain;charset=utf-8");
+        }
+
+        function downloadSampleCSV() {
+            const csvContent = `\uFEFFCâu hỏi,Đáp án A,Đáp án B,Đáp án C,Đáp án D,Đáp án đúng,Chủ đề
+"Câu 1: Đơn vị của lực trong hệ SI là gì?","Jun (J)","Niutơn (N)","Oát (W)","Paxcan (Pa)","B","Lực học"
+"Câu 2: Hai lực cân bằng là hai lực có đặc điểm nào?","Cùng chiều","Cùng độ lớn, ngược chiều, cùng giá","Khác giá","Tác dụng lên hai vật khác nhau","B","Cân bằng lực"`;
+            triggerDownload(csvContent, "De_Mau_Vat_Li.csv", "text/csv;charset=utf-8");
+        }
+
+        function triggerDownload(content, filename, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        /* =========================================================================
+           6. THÔNG BÁO TOAST & PHÁO HOA CHÚC MỪNG
+           ========================================================================= */
+        function showToast(message, type = "info") {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            const colors = {
+                success: "bg-emerald-600 text-white border-emerald-700",
+                error: "bg-rose-600 text-white border-rose-700",
+                info: "bg-sky-700 text-white border-sky-800"
+            };
+            const icons = { success: "✅", error: "⚠️", info: "ℹ️" };
+
+            toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl border text-xs sm:text-sm font-semibold animate-pop ${colors[type] || colors.info}`;
+            toast.innerHTML = `<span>${icons[type] || "ℹ️"}</span><span>${escapeHTML(message)}</span>`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3400);
+        }
+
+        // Hiệu ứng pháo hoa giấy
+        let confettiParticles = [];
+        let confettiAnimId = null;
+
+        function launchConfetti(count = 60) {
+            const canvas = document.getElementById('confetti-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const palette = ['#0284c7', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+            for (let i = 0; i < count; i++) {
+                confettiParticles.push({
+                    x: canvas.width * (0.2 + Math.random() * 0.6),
+                    y: canvas.height * 0.35,
+                    vx: (Math.random() - 0.5) * 12,
+                    vy: -Math.random() * 10 - 3,
+                    size: Math.random() * 7 + 4,
+                    color: palette[Math.floor(Math.random() * palette.length)],
+                    rotation: Math.random() * 360,
+                    vRot: (Math.random() - 0.5) * 12,
+                    life: 100
+                });
+            }
+
+            if (!confettiAnimId) {
+                animateConfetti();
+            }
+        }
+
+        function animateConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            confettiParticles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.32;
+                p.rotation += p.vRot;
+                p.life--;
+
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate((p.rotation * Math.PI) / 180);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+                ctx.restore();
+            });
+
+            confettiParticles = confettiParticles.filter(p => p.life > 0);
+            if (confettiParticles.length > 0) {
+                confettiAnimId = requestAnimationFrame(animateConfetti);
+            } else {
+                confettiAnimId = null;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        /* =========================================================================
+           7. QUẢN LÝ LỚP HỌC & BẢNG XẾP HẠNG THỜI GIAN THỰC
+           ========================================================================= */
+        window.onCloudUserReady = function(uid) {
+            state.userId = uid;
+            const idEl = document.getElementById('display-full-userid');
+            if (idEl) {
+                idEl.textContent = uid;
+            }
+        };
+
+        window.onRemoteSessionUpdate = function(remoteData) {
+            if (!remoteData || !remoteData.sessionId) return;
+            // Bỏ qua nếu chính máy giáo viên vừa phát phiên này
+            if (remoteData.sessionId === state.sessionId) return;
+
+            state.sessionId = remoteData.sessionId;
+            if (remoteData.topicName) {
+                state.topicName = remoteData.topicName;
+            }
+            if (Array.isArray(remoteData.questionBank) && remoteData.questionBank.length > 0) {
+                state.questionBank = remoteData.questionBank;
+            }
+            if (remoteData.desiredSteps) {
+                state.desiredSteps = remoteData.desiredSteps;
+            }
+            if (remoteData.selectionMode) {
+                state.selectionMode = remoteData.selectionMode;
+            }
+            if (Array.isArray(remoteData.selectedQuestionIndices)) {
+                state.selectedQuestionIndices = remoteData.selectedQuestionIndices;
+            }
+
+            closeVictoryModal();
+            startNewJourney();
+            showToast(`📢 Giáo viên vừa cập nhật đề mới: "${state.topicName}" (${state.desiredSteps} bậc)!`, "info");
+        };
+
+        window.onRemoteLeaderboardUpdate = function(entries) {
+            state.leaderboardEntries = Array.isArray(entries) ? entries : [];
+            const countBadge = document.getElementById('header-rank-count');
+            if (countBadge) {
+                countBadge.textContent = state.leaderboardEntries.length;
+            }
+            renderLeaderboardLists();
+        };
+
+        function broadcastTeacherSessionToClass() {
+            if (!window.physicCloud) return;
+            window.physicCloud.publishTeacherSession({
+                sessionId: state.sessionId,
+                topicName: state.topicName,
+                questionBank: state.questionBank,
+                desiredSteps: state.desiredSteps,
+                selectionMode: state.selectionMode,
+                selectedQuestionIndices: state.selectedQuestionIndices
+            });
+        }
+
+        function pushStudentStatusToCloud(isCompleted, stepReached = state.currentStepIndex) {
+            if (!window.physicCloud || !state.studentName) return;
+            const duration = isCompleted
+                ? (state.lastDurationSeconds || Math.max(1, Math.round((Date.now() - state.quizStartTime) / 1000)))
+                : Math.max(1, Math.round((Date.now() - state.quizStartTime) / 1000));
+
+            window.physicCloud.syncStudentProgress({
+                studentName: state.studentName,
+                studentClass: state.studentClass || "",
+                score: state.score,
+                currentStep: stepReached,
+                totalSteps: state.activeQuestions.length,
+                completed: Boolean(isCompleted),
+                durationSeconds: duration,
+                topicName: state.topicName
+            });
+        }
+
+        function getSortedLeaderboard() {
+            return [...state.leaderboardEntries].sort((a, b) => {
+                // Ưu tiên học sinh đã hoàn thành về đích lên trước
+                if (Boolean(a.completed) !== Boolean(b.completed)) {
+                    return a.completed ? -1 : 1;
+                }
+                // Điểm cao hơn xếp trên
+                if ((b.score || 0) !== (a.score || 0)) {
+                    return (b.score || 0) - (a.score || 0);
+                }
+                // Nếu bằng điểm, ai hoàn thành nhanh hơn (ít giây hơn) xếp trên
+                if (a.completed && b.completed) {
+                    const timeA = a.durationSeconds || 999999;
+                    const timeB = b.durationSeconds || 999999;
+                    if (timeA !== timeB) return timeA - timeB;
+                }
+                // Nếu đang leo dở, ai leo được nhiều bậc hơn xếp trên
+                return (b.currentStep || 0) - (a.currentStep || 0);
+            });
+        }
+
+        function renderLeaderboardLists() {
+            const sorted = getSortedLeaderboard();
+            const finishedCount = sorted.filter(item => item.completed).length;
+
+            const totalPlayersEl = document.getElementById('victory-total-players');
+            if (totalPlayersEl) {
+                totalPlayersEl.textContent = `${finishedCount} đã về đích / ${sorted.length} tham gia`;
+            }
+
+            const summaryEl = document.getElementById('modal-leaderboard-summary');
+            if (summaryEl) {
+                summaryEl.textContent = `Tổng số học sinh tham gia: ${sorted.length} • Đã về đích: ${finishedCount}`;
+            }
+
+            const subtitleEl = document.getElementById('leaderboard-topic-subtitle');
+            if (subtitleEl) {
+                subtitleEl.textContent = `Chủ đề: ${state.topicName}`;
+            }
+
+            const htmlContent = sorted.length === 0
+                ? `<div class="text-center py-6 text-xs sm:text-sm text-slate-400">Chưa có học sinh nào ghi danh. Hãy nhập tên và bắt đầu leo núi nhé!</div>`
+                : sorted.map((item, index) => {
+                    const rank = index + 1;
+                    const isMe = state.userId && item.userId === state.userId;
+                    const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+                    const statusBadge = item.completed
+                        ? `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold text-[11px]">🏆 Về đích (${item.durationSeconds || 0}s)</span>`
+                        : `<span class="px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 font-semibold text-[11px]">🧗 Bậc ${item.currentStep || 0}/${item.totalSteps || state.desiredSteps}</span>`;
+
+                    return `
+                        <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl border ${isMe ? 'bg-amber-50 border-amber-400 shadow-sm' : 'bg-white border-slate-200'}">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <span class="w-8 h-8 rounded-lg ${rank <= 3 ? 'bg-amber-100 text-amber-900 text-base' : 'bg-slate-100 text-slate-600 text-xs'} font-bold flex items-center justify-center shrink-0">
+                                    ${medal}
+                                </span>
+                                <div class="min-w-0">
+                                    <p class="text-xs sm:text-sm font-bold text-slate-800 truncate">
+                                        ${escapeHTML(item.studentName || 'Học sinh')}
+                                        ${item.studentClass ? `<span class="text-slate-500 font-medium">(${escapeHTML(item.studentClass)})</span>` : ''}
+                                        ${isMe ? `<span class="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-amber-500 text-white">Bạn</span>` : ''}
+                                    </p>
+                                    <div class="mt-0.5">${statusBadge}</div>
+                                </div>
+                            </div>
+                            <div class="text-right shrink-0">
+                                <span class="text-sm sm:text-base font-extrabold text-sky-700">${item.score || 0}</span>
+                                <span class="text-[11px] font-semibold text-slate-500 block">điểm</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            const victoryList = document.getElementById('victory-leaderboard-list');
+            if (victoryList) victoryList.innerHTML = htmlContent;
+
+            const modalList = document.getElementById('modal-leaderboard-list');
+            if (modalList) modalList.innerHTML = htmlContent;
+        }
+
+        function openStudentJoinModal() {
+            document.getElementById('student-name-input').value = state.studentName;
+            document.getElementById('student-class-input').value = state.studentClass;
+            if (state.userId) {
+                document.getElementById('display-full-userid').textContent = state.userId;
+            }
+            const modal = document.getElementById('student-join-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeStudentJoinModal() {
+            const modal = document.getElementById('student-join-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function submitStudentInfo(event) {
+            event.preventDefault();
+            const nameVal = document.getElementById('student-name-input').value.trim();
+            const classVal = document.getElementById('student-class-input').value.trim();
+            if (!nameVal) {
+                showToast("Vui lòng nhập họ và tên học sinh!", "error");
+                return;
+            }
+
+            state.studentName = nameVal;
+            state.studentClass = classVal;
+            state.isTeacherRole = false;
+
+            const headerNameEl = document.getElementById('header-student-name');
+            if (headerNameEl) {
+                headerNameEl.textContent = classVal ? `${nameVal} (${classVal})` : nameVal;
+            }
+
+            closeStudentJoinModal();
+            startBGM();
+            pushStudentStatusToCloud(false);
+            showToast(`Chào mừng ${nameVal} tham gia Đỉnh Physic!`, "success");
+        }
+
+        function enterAsTeacher() {
+            state.isTeacherRole = true;
+            const headerNameEl = document.getElementById('header-student-name');
+            if (headerNameEl) {
+                headerNameEl.textContent = "👩‍🏫 Giáo viên";
+            }
+            closeStudentJoinModal();
+            openTeacherModal();
+        }
+
+        function openLeaderboardModal() {
+            renderLeaderboardLists();
+            const modal = document.getElementById('leaderboard-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeLeaderboardModal() {
+            const modal = document.getElementById('leaderboard-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function showClearRankConfirm() {
+            document.getElementById('clear-rank-trigger-btn').classList.add('hidden');
+            const box = document.getElementById('clear-rank-confirm-box');
+            box.classList.remove('hidden');
+            box.classList.add('flex');
+        }
+
+        function hideClearRankConfirm() {
+            document.getElementById('clear-rank-trigger-btn').classList.remove('hidden');
+            const box = document.getElementById('clear-rank-confirm-box');
+            box.classList.add('hidden');
+            box.classList.remove('flex');
+        }
+
+        async function confirmClearLeaderboard() {
+            hideClearRankConfirm();
+            if (!window.physicCloud) return;
+            const ok = await window.physicCloud.clearClassroomLeaderboard();
+            if (ok) {
+                showToast("Đã xóa toàn bộ bảng xếp hạng cũ cho vòng thi mới!", "success");
+            } else {
+                showToast("Không thể xóa bảng xếp hạng lúc này.", "error");
+            }
+        }
+
+        /* =========================================================================
+           8. KHỞI TẠO TRANG WEB KHI TẢI XONG
+           ========================================================================= */
+        window.addEventListener('DOMContentLoaded', () => {
+            startNewJourney();
+            startBGM();
+
+            // Mở bảng nhập tên học sinh khi mới vào lớp
+            if (!state.studentName && !state.isTeacherRole) {
+                openStudentJoinModal();
+            }
+
+            // Tự động bật nhạc nền ngay lần chạm/nhấp chuột đầu tiên nếu trình duyệt chặn autoplay
+            const unlockAudioOnce = () => {
+                if (!isBGMPlaying) {
+                    startBGM();
+                }
+                window.removeEventListener('pointerdown', unlockAudioOnce);
+            };
+            window.addEventListener('pointerdown', unlockAudioOnce);
         });
-      } else {
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        }
-      }
-    });
-
-    // Khởi tạo ban đầu
-    window.onload = () => {
-      setupBranding();
-    };
-  </script>
+    </script>
 </body>
 </html>
